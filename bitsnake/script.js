@@ -7,6 +7,10 @@ class SnakeGame {
         this.startBtn = document.getElementById('start-btn');
         this.pauseBtn = document.getElementById('pause-btn');
         this.resetBtn = document.getElementById('reset-btn');
+        this.upArrow = document.getElementById('up-arrow');
+        this.downArrow = document.getElementById('down-arrow');
+        this.leftArrow = document.getElementById('left-arrow');
+        this.rightArrow = document.getElementById('right-arrow');
 
         // Game settings
         this.gridSize = 20;
@@ -40,6 +44,7 @@ class SnakeGame {
         this.updateHighScoreDisplay();
         this.setupEventListeners();
         this.createAudioContext();
+        this.updateArrowButtonStates();
         this.draw();
     }
 
@@ -48,6 +53,12 @@ class SnakeGame {
         this.startBtn.addEventListener('click', () => this.startGame());
         this.pauseBtn.addEventListener('click', () => this.togglePause());
         this.resetBtn.addEventListener('click', () => this.resetGame());
+
+        // Arrow button event listeners
+        this.upArrow.addEventListener('click', () => this.handleArrowClick('up'));
+        this.downArrow.addEventListener('click', () => this.handleArrowClick('down'));
+        this.leftArrow.addEventListener('click', () => this.handleArrowClick('left'));
+        this.rightArrow.addEventListener('click', () => this.handleArrowClick('right'));
 
         // Keyboard event listeners
         document.addEventListener('keydown', (e) => this.handleKeyPress(e));
@@ -96,8 +107,50 @@ class SnakeGame {
         }
     }
 
+    handleArrowClick(direction) {
+        if (!this.gameRunning || this.gamePaused) return;
+
+        // Prevent reverse direction and update snake direction
+        switch (direction) {
+            case 'up':
+                if (this.dy === 0) {
+                    this.dx = 0;
+                    this.dy = -1;
+                }
+                break;
+            case 'down':
+                if (this.dy === 0) {
+                    this.dx = 0;
+                    this.dy = 1;
+                }
+                break;
+            case 'left':
+                if (this.dx === 0) {
+                    this.dx = -1;
+                    this.dy = 0;
+                }
+                break;
+            case 'right':
+                if (this.dx === 0) {
+                    this.dx = 1;
+                    this.dy = 0;
+                }
+                break;
+        }
+    }
+
+    updateArrowButtonStates() {
+        // Enable/disable arrow buttons based on game state
+        const isEnabled = this.gameRunning && !this.gamePaused;
+        this.upArrow.disabled = !isEnabled;
+        this.downArrow.disabled = !isEnabled;
+        this.leftArrow.disabled = !isEnabled;
+        this.rightArrow.disabled = !isEnabled;
+    }
+
     startGame() {
-        if (this.gameRunning) return;
+        // Reset the game state first
+        this.resetGame();
 
         this.gameRunning = true;
         this.gamePaused = false;
@@ -108,6 +161,8 @@ class SnakeGame {
             this.dx = 1;
             this.dy = 0;
         }
+
+        this.updateArrowButtonStates();
 
         this.gameLoop = setInterval(() => {
             if (!this.gamePaused) {
@@ -122,6 +177,7 @@ class SnakeGame {
 
         this.gamePaused = !this.gamePaused;
         this.pauseBtn.textContent = this.gamePaused ? 'Resume' : 'Pause';
+        this.updateArrowButtonStates();
 
         if (this.gamePaused) {
             this.drawPauseScreen();
@@ -145,6 +201,7 @@ class SnakeGame {
         this.startBtn.disabled = false;
         this.pauseBtn.disabled = true;
         this.pauseBtn.textContent = 'Pause';
+        this.updateArrowButtonStates();
 
         this.generateInitialFood();
         this.draw();
@@ -249,7 +306,7 @@ class SnakeGame {
                 
                 if (this.dx !== 0 || this.dy !== 0) {
                     this.ctx.fillRect(eyeX1, eyeY1, eyeSize, eyeSize);
-                    this.ctx.fillRect(eyeX2, eyeY2, eyeSize, eyeSize);
+                    this.ctx.fillRect(eyeX2, eyeY1, eyeSize, eyeSize);
                 }
             }
         });
@@ -323,6 +380,7 @@ class SnakeGame {
         this.startBtn.disabled = false;
         this.pauseBtn.disabled = true;
         this.pauseBtn.textContent = 'Pause';
+        this.updateArrowButtonStates();
 
         // Update high score
         if (this.score > this.highScore) {

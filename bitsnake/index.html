@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snake Game</title>
     <link rel="stylesheet" href="style.css">
+    <script>
+        // Simple cache-busting - add timestamp to CSS
+        document.addEventListener('DOMContentLoaded', function() {
+            const timestamp = new Date().getTime();
+            const cssLink = document.querySelector('link[href*="style.css"]');
+            if (cssLink) {
+                cssLink.href = `style.css?t=${timestamp}`;
+            }
+        });
+    </script>
 </head>
 <body>
     <button class="back-arrow" onclick="window.location.href='../index.html'" title="Back to Homepage">
@@ -40,6 +50,10 @@
             <p>Don't hit the walls or yourself!</p>
         </div>
     </div>
-    <script src="script.js"></script>
+    <!-- Load game script with automatic cache-busting -->
+    <script>
+        const timestamp = Date.now(); // Shorter way to get timestamp
+        document.write('<script src="script.js?t=' + timestamp + '"><\/script>');
+    </script>
 </body>
 </html>

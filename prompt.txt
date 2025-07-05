@@ -1,0 +1,7 @@
+Please create a basketball shooting game using html and javascript. Following are the requirements:
+1) There should be a hoop on the right side of the screen and a basketball on the left side.
+2) The player should be able to click on the basketball and drag to the left, with the ball staying in place and displaying an arrow pointing towards the opposite direction.
+3) The further the mouse is pulled away from the ball, the futher the basketball will shoot
+4) When the mouse is pulled away from the ball, the user can move it around to change the angle to shoot the basketball
+5) When user releases the mouse button, the basketball will be shoot out and follow a parabolic motion.
+6) When the basketball falls into the hoop, the user score a point.

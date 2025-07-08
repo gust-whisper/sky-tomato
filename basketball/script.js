@@ -11,6 +11,13 @@ class BasketballGame {
         this.gameRunning = false;
         this.showTrajectory = false;
         
+        // Special effects
+        this.particles = [];
+        this.screenShake = { x: 0, y: 0, intensity: 0, duration: 0 };
+        this.scoreMessage = { text: '', opacity: 0, y: 0, timer: 0 };
+        this.flashEffect = { opacity: 0, color: '#FFD700' };
+        this.netAnimation = { intensity: 0, duration: 0 };
+        
         // Basketball properties
         this.ball = {
             x: 100,
@@ -152,6 +159,13 @@ class BasketballGame {
         
         // Check if ball scores
         this.checkScore();
+        
+        // Update special effects
+        this.updateParticles();
+        this.updateScreenShake();
+        this.updateScoreMessage();
+        this.updateFlashEffect();
+        this.updateNetAnimation();
     }
     
     checkScore() {
@@ -177,7 +191,119 @@ class BasketballGame {
             
             this.score++;
             this.scoreElement.textContent = this.score;
+            
+            // Trigger special effects
+            this.triggerScoreEffects();
+            
             this.resetBall();
+        }
+    }
+    
+    triggerScoreEffects() {
+        // Create particle explosion
+        this.createParticleExplosion(this.hoop.x + this.hoop.width / 2, this.hoop.rimY + 10);
+        
+        // Trigger screen shake
+        this.screenShake.intensity = 5;
+        this.screenShake.duration = 300; // milliseconds
+        
+        // Show score message
+        this.scoreMessage.text = this.getRandomScoreText();
+        this.scoreMessage.opacity = 1;
+        this.scoreMessage.y = this.hoop.y - 50;
+        this.scoreMessage.timer = 0;
+        
+        // Flash effect
+        this.flashEffect.opacity = 0.3;
+        
+        // Net animation
+        this.netAnimation.intensity = 8;
+        this.netAnimation.duration = 500;
+    }
+    
+    getRandomScoreText() {
+        const messages = [
+            "SWISH!", "NICE SHOT!", "BOOM!", "PERFECT!", 
+            "AMAZING!", "FANTASTIC!", "INCREDIBLE!", "AWESOME!"
+        ];
+        return messages[Math.floor(Math.random() * messages.length)];
+    }
+    
+    createParticleExplosion(x, y) {
+        const numParticles = 15;
+        const colors = ['#FFD700', '#FF6B35', '#F7931E', '#FFE135', '#C7F464'];
+        
+        for (let i = 0; i < numParticles; i++) {
+            this.particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8 - 2,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                life: 1.0,
+                decay: Math.random() * 0.02 + 0.01,
+                size: Math.random() * 4 + 2
+            });
+        }
+    }
+    
+    updateParticles() {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const particle = this.particles[i];
+            
+            // Update position
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.vy += 0.1; // gravity
+            
+            // Update life
+            particle.life -= particle.decay;
+            
+            // Remove dead particles
+            if (particle.life <= 0) {
+                this.particles.splice(i, 1);
+            }
+        }
+    }
+    
+    updateScreenShake() {
+        if (this.screenShake.duration > 0) {
+            this.screenShake.duration -= 16; // Assuming 60fps
+            const intensity = this.screenShake.intensity * (this.screenShake.duration / 300);
+            this.screenShake.x = (Math.random() - 0.5) * intensity;
+            this.screenShake.y = (Math.random() - 0.5) * intensity;
+        } else {
+            this.screenShake.x = 0;
+            this.screenShake.y = 0;
+        }
+    }
+    
+    updateScoreMessage() {
+        if (this.scoreMessage.opacity > 0) {
+            this.scoreMessage.timer += 16;
+            this.scoreMessage.y -= 0.5; // Float upward
+            
+            // Fade out after 1 second
+            if (this.scoreMessage.timer > 1000) {
+                this.scoreMessage.opacity -= 0.02;
+            }
+            
+            if (this.scoreMessage.opacity <= 0) {
+                this.scoreMessage.text = '';
+            }
+        }
+    }
+    
+    updateFlashEffect() {
+        if (this.flashEffect.opacity > 0) {
+            this.flashEffect.opacity -= 0.015;
+        }
+    }
+    
+    updateNetAnimation() {
+        if (this.netAnimation.duration > 0) {
+            this.netAnimation.duration -= 16;
+            this.netAnimation.intensity = Math.max(0, this.netAnimation.intensity * 0.95);
         }
     }
     
@@ -314,12 +440,15 @@ class BasketballGame {
         this.ctx.lineWidth = 4;
         this.ctx.stroke();
         
-        // Net
+        // Net (with animation)
         for (let i = 0; i < 6; i++) {
             const x = this.hoop.x + (i * this.hoop.width / 5);
+            const netSwing = Math.sin(Date.now() * 0.01 + i) * 3;
+            const animationSwing = Math.sin(Date.now() * 0.02 + i) * this.netAnimation.intensity;
+            
             this.ctx.beginPath();
             this.ctx.moveTo(x, this.hoop.rimY);
-            this.ctx.lineTo(x + Math.sin(Date.now() * 0.01 + i) * 3, this.hoop.rimY + 20);
+            this.ctx.lineTo(x + netSwing + animationSwing, this.hoop.rimY + 20 + this.netAnimation.intensity);
             this.ctx.strokeStyle = '#FFF';
             this.ctx.lineWidth = 2;
             this.ctx.stroke();
@@ -428,19 +557,78 @@ class BasketballGame {
         this.ctx.restore();
     }
     
+    drawParticles() {
+        this.ctx.save();
+        
+        for (const particle of this.particles) {
+            this.ctx.globalAlpha = particle.life;
+            this.ctx.fillStyle = particle.color;
+            this.ctx.beginPath();
+            this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+        
+        this.ctx.restore();
+    }
+    
+    drawScoreMessage() {
+        if (this.scoreMessage.opacity <= 0) return;
+        
+        this.ctx.save();
+        this.ctx.globalAlpha = this.scoreMessage.opacity;
+        this.ctx.font = 'bold 36px Arial';
+        this.ctx.fillStyle = '#FFD700';
+        this.ctx.strokeStyle = '#FF6B35';
+        this.ctx.lineWidth = 3;
+        this.ctx.textAlign = 'center';
+        
+        // Add text shadow effect
+        this.ctx.fillText(this.scoreMessage.text, this.hoop.x + this.hoop.width / 2 + 2, this.scoreMessage.y + 2);
+        this.ctx.strokeText(this.scoreMessage.text, this.hoop.x + this.hoop.width / 2, this.scoreMessage.y);
+        this.ctx.fillText(this.scoreMessage.text, this.hoop.x + this.hoop.width / 2, this.scoreMessage.y);
+        
+        this.ctx.restore();
+    }
+    
+    drawFlashEffect() {
+        if (this.flashEffect.opacity <= 0) return;
+        
+        this.ctx.save();
+        this.ctx.globalAlpha = this.flashEffect.opacity;
+        this.ctx.fillStyle = this.flashEffect.color;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.restore();
+    }
+    
     draw() {
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Apply screen shake
+        this.ctx.save();
+        this.ctx.translate(this.screenShake.x, this.screenShake.y);
         
         // Draw game elements
         this.drawHoop();
         this.drawBall();
         this.drawTrajectory();
         this.drawAimingArrow();
+        this.drawParticles();
+        this.drawScoreMessage();
+        
+        this.ctx.restore();
+        
+        // Draw flash effect (outside screen shake)
+        this.drawFlashEffect();
     }
     
     gameLoop() {
         this.updateBall();
+        this.updateParticles();
+        this.updateScreenShake();
+        this.updateScoreMessage();
+        this.updateFlashEffect();
+        this.updateNetAnimation();
         this.draw();
         requestAnimationFrame(() => this.gameLoop());
     }

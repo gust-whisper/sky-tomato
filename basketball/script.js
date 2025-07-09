@@ -3,10 +3,13 @@ class BasketballGame {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.scoreElement = document.getElementById('score');
+        this.highScoreElement = document.getElementById('highScore');
         this.trajectoryToggle = document.getElementById('trajectoryToggle');
         
         // Game state
         this.score = 0;
+        this.highScore = this.loadHighScore();
+        this.missCounter = 0; // Counter for missed shots
         this.isDragging = false;
         this.gameRunning = false;
         this.showTrajectory = false;
@@ -192,33 +195,45 @@ class BasketballGame {
             this.score++;
             this.scoreElement.textContent = this.score;
             
+            // Reset miss counter on successful shot
+            this.missCounter = 0;
+            
+            // Check for new high score
+            const isNewHighScore = this.updateHighScore();
+            
             // Trigger special effects
-            this.triggerScoreEffects();
+            this.triggerScoreEffects(isNewHighScore);
             
             this.resetBall();
         }
     }
     
-    triggerScoreEffects() {
+    triggerScoreEffects(isNewHighScore = false) {
         // Create particle explosion
         this.createParticleExplosion(this.hoop.x + this.hoop.width / 2, this.hoop.rimY + 10);
         
-        // Trigger screen shake
-        this.screenShake.intensity = 5;
-        this.screenShake.duration = 300; // milliseconds
+        // Trigger screen shake (more intense for high score)
+        this.screenShake.intensity = isNewHighScore ? 8 : 5;
+        this.screenShake.duration = isNewHighScore ? 500 : 300; // milliseconds
         
         // Show score message
-        this.scoreMessage.text = this.getRandomScoreText();
+        this.scoreMessage.text = isNewHighScore ? 'NEW HIGH SCORE!' : this.getRandomScoreText();
         this.scoreMessage.opacity = 1;
         this.scoreMessage.y = this.hoop.y - 50;
         this.scoreMessage.timer = 0;
         
-        // Flash effect
-        this.flashEffect.opacity = 0.3;
+        // Flash effect (more intense for high score)
+        this.flashEffect.opacity = isNewHighScore ? 0.5 : 0.3;
+        this.flashEffect.color = isNewHighScore ? '#FFD700' : '#FFD700';
         
         // Net animation
-        this.netAnimation.intensity = 8;
-        this.netAnimation.duration = 500;
+        this.netAnimation.intensity = isNewHighScore ? 12 : 8;
+        this.netAnimation.duration = isNewHighScore ? 800 : 500;
+        
+        // Extra particles for high score
+        if (isNewHighScore) {
+            this.createParticleExplosion(this.hoop.x + this.hoop.width / 2, this.hoop.rimY + 10);
+        }
     }
     
     getRandomScoreText() {
@@ -378,6 +393,22 @@ class BasketballGame {
     }
     
     resetBall() {
+        // Increment miss counter
+        this.missCounter++;
+        
+        // Every 3 misses, remove a point from the score
+        if (this.missCounter >= 3 && this.score > 0) {
+            this.score--;
+            this.scoreElement.textContent = this.score;
+            this.missCounter = 0; // Reset the miss counter
+            
+            // Show penalty message
+            this.showPenaltyMessage();
+        }
+        
+        // Save high score before resetting
+        this.updateHighScore();
+        
         this.ball.x = this.ball.originalX;
         this.ball.y = this.ball.originalY;
         this.ball.vx = 0;
@@ -386,6 +417,18 @@ class BasketballGame {
         this.isDragging = false;
     }
     
+    showPenaltyMessage() {
+        // Show penalty message
+        this.scoreMessage.text = 'PENALTY: -1 POINT!';
+        this.scoreMessage.opacity = 1;
+        this.scoreMessage.y = this.canvas.height / 2;
+        this.scoreMessage.timer = 0;
+        
+        // Flash effect for penalty
+        this.flashEffect.opacity = 0.3;
+        this.flashEffect.color = '#FF4444'; // Red flash for penalty
+    }
+
     drawBall() {
         this.ctx.save();
         
@@ -519,7 +562,6 @@ class BasketballGame {
         const vy = Math.sin(angle) * power;
         
         this.ctx.save();
-        this.ctx.setLineDash([5, 5]); // Dashed line
         this.ctx.strokeStyle = '#000000';
         this.ctx.lineWidth = 2;
         this.ctx.globalAlpha = 0.35;
@@ -532,6 +574,9 @@ class BasketballGame {
         
         this.ctx.beginPath();
         this.ctx.moveTo(x, y);
+        
+        let lastX = x;
+        let lastY = y;
         
         // Draw trajectory points
         for (let i = 0; i < 100; i++) {
@@ -550,10 +595,32 @@ class BasketballGame {
             // Draw point every few iterations for better visibility
             if (i % 3 === 0) {
                 this.ctx.lineTo(x, y);
+                lastX = x;
+                lastY = y;
             }
         }
         
         this.ctx.stroke();
+        
+        // Draw arrow at the end of trajectory
+        if (lastX !== this.ball.x || lastY !== this.ball.y) {
+            const arrowSize = 8;
+            const trajectoryAngle = Math.atan2(velY, velX);
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(lastX, lastY);
+            this.ctx.lineTo(
+                lastX - arrowSize * Math.cos(trajectoryAngle - 0.5),
+                lastY - arrowSize * Math.sin(trajectoryAngle - 0.5)
+            );
+            this.ctx.moveTo(lastX, lastY);
+            this.ctx.lineTo(
+                lastX - arrowSize * Math.cos(trajectoryAngle + 0.5),
+                lastY - arrowSize * Math.sin(trajectoryAngle + 0.5)
+            );
+            this.ctx.stroke();
+        }
+        
         this.ctx.restore();
     }
     
@@ -631,6 +698,33 @@ class BasketballGame {
         this.updateNetAnimation();
         this.draw();
         requestAnimationFrame(() => this.gameLoop());
+    }
+    
+    loadHighScore() {
+        const savedHighScore = localStorage.getItem('basketballHighScore');
+        const highScore = savedHighScore ? parseInt(savedHighScore) : 0;
+        this.updateHighScoreDisplay(highScore);
+        return highScore;
+    }
+    
+    saveHighScore() {
+        localStorage.setItem('basketballHighScore', this.highScore.toString());
+    }
+    
+    updateHighScore() {
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            this.updateHighScoreDisplay(this.highScore);
+            this.saveHighScore();
+            return true; // New high score achieved
+        }
+        return false;
+    }
+    
+    updateHighScoreDisplay(score) {
+        if (this.highScoreElement) {
+            this.highScoreElement.textContent = score;
+        }
     }
 }
 

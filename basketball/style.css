@@ -29,20 +29,20 @@ body {
     position: absolute;
     top: 12px;
     left: 12px;
-    background: linear-gradient(135deg, rgba(255, 204, 153, 0.95), rgba(255, 179, 102, 0.9));
+    background: linear-gradient(135deg, rgba(248, 248, 248, 0.95), rgba(240, 240, 240, 0.9));
     padding: 8px 12px;
     border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 165, 0, 0.4);
+    border: 1px solid rgba(200, 200, 200, 0.4);
     backdrop-filter: blur(6px);
     z-index: 10;
     transition: all 0.3s ease;
 }
 
 .trajectory-toggle:hover {
-    background: linear-gradient(135deg, rgba(255, 214, 173, 1), rgba(255, 189, 122, 0.95));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(248, 248, 248, 0.95));
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
@@ -60,7 +60,7 @@ body {
     width: 14px;
     height: 14px;
     cursor: pointer;
-    accent-color: #FF6B35;
+    accent-color: #666;
 }
 
 .toggle-text {
@@ -69,11 +69,22 @@ body {
     letter-spacing: 0.5px;
 }
 
-.score {
+.score-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 10px;
+}
+
+.score, .high-score {
     font-size: 24px;
     font-weight: bold;
     color: #333;
-    margin-bottom: 10px;
+}
+
+.high-score {
+    color: #FFD700;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 #gameCanvas {

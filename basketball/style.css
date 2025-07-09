@@ -20,15 +20,31 @@ body {
     transition: transform 0.1s ease-out; /* Smooth screen shake effect */
 }
 
+.canvas-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
 .trajectory-toggle {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(255, 255, 255, 0.9);
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(135deg, rgba(255, 204, 153, 0.95), rgba(255, 179, 102, 0.9));
     padding: 8px 12px;
     border-radius: 8px;
     font-size: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 165, 0, 0.4);
+    backdrop-filter: blur(6px);
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.trajectory-toggle:hover {
+    background: linear-gradient(135deg, rgba(255, 214, 173, 1), rgba(255, 189, 122, 0.95));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .trajectory-toggle label {
@@ -36,10 +52,21 @@ body {
     align-items: center;
     cursor: pointer;
     margin: 0;
+    color: #333;
 }
 
 .trajectory-toggle input[type="checkbox"] {
     margin-right: 6px;
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    accent-color: #FF6B35;
+}
+
+.toggle-text {
+    user-select: none;
+    font-family: 'Arial', sans-serif;
+    letter-spacing: 0.5px;
 }
 
 .score {

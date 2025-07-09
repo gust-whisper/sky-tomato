@@ -341,8 +341,8 @@ class BasketballGame {
         const rimRight = this.hoop.x + this.hoop.width;
         
         // Define the solid parts of the rim (left and right edges)
-        const leftRimEnd = this.hoop.x + 5; // Left solid part
-        const rightRimStart = this.hoop.x + this.hoop.width - 5; // Right solid part
+        const leftRimEnd = this.hoop.x + 1; // Left solid part
+        const rightRimStart = this.hoop.x + this.hoop.width - 1; // Right solid part
         
         // Check collision with left rim edge
         if (ballRight > rimLeft && 
@@ -522,7 +522,7 @@ class BasketballGame {
         this.ctx.setLineDash([5, 5]); // Dashed line
         this.ctx.strokeStyle = '#000000';
         this.ctx.lineWidth = 2;
-        this.ctx.globalAlpha = 0.7;
+        this.ctx.globalAlpha = 0.35;
         
         // Simulate trajectory
         let x = this.ball.x;

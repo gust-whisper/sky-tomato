@@ -11,13 +11,16 @@
         ←
     </button>
     <div class="game-container">
-        <div class="trajectory-toggle">
-            <label>
-                <input type="checkbox" id="trajectoryToggle"> Show Trajectory
-            </label>
-        </div>
         <div class="score">Score: <span id="score">0</span></div>
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="trajectory-toggle">
+                <label>
+                    <input type="checkbox" id="trajectoryToggle">
+                    <span class="toggle-text">Show Trajectory</span>
+                </label>
+            </div>
+        </div>
         <div class="instructions">
             <p>Click and drag the basketball to aim, then release to shoot!</p>
             <p class="effects-note">🎉 Special effects on scoring! 🎉</p>

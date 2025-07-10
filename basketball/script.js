@@ -32,7 +32,9 @@ class BasketballGame {
             originalY: 400,
             currentResetX: 100,  // Track current reset position
             currentResetY: 400,  // Track current reset position
-            isMoving: false
+            isMoving: false,
+            scored: false,      // Track if ball has scored
+            scoreTime: 0        // Timer for score delay
         };
         
         // Hoop properties
@@ -117,6 +119,24 @@ class BasketballGame {
                 // Update current reset position when teleporting
                 this.ball.currentResetX = refDotX;
                 this.ball.currentResetY = refDotY;
+            }
+            return;
+        }
+        
+        // Check if clicking on second reference dot (two-thirds position)
+        const refDot2X = this.ball.originalX + (deltaX * 2 / 3);
+        const refDot2Y = this.ball.originalY;
+        const refDot2Distance = Math.sqrt((mousePos.x - refDot2X) ** 2 + (mousePos.y - refDot2Y) ** 2);
+        
+        // Second reference dot is always visible, so check it
+        if (refDot2Distance <= 8) { // 8 pixel radius for easier clicking
+            // Only teleport if ball is not already at second reference dot position
+            if (Math.abs(this.ball.x - refDot2X) > 5 || Math.abs(this.ball.y - refDot2Y) > 5) {
+                this.ball.x = refDot2X;
+                this.ball.y = refDot2Y;
+                // Update current reset position when teleporting
+                this.ball.currentResetX = refDot2X;
+                this.ball.currentResetY = refDot2Y;
             }
             return;
         }
@@ -248,7 +268,8 @@ class BasketballGame {
         const hoopRightEdge = this.hoop.x + this.hoop.width - hoopMargin;
         
         // Check if ball is going through the hoop opening (not hitting the rim)
-        if (ballRight > hoopLeftEdge && 
+        if (!this.ball.scored && // Only score once per shot
+            ballRight > hoopLeftEdge && 
             ballLeft < hoopRightEdge &&
             ballTop < this.hoop.rimY && 
             ballBottom > this.hoop.rimY &&
@@ -262,12 +283,19 @@ class BasketballGame {
             // Reset miss counter on successful shot
             this.missCounter = 0;
             
+            // Mark ball as scored and start timer
+            this.ball.scored = true;
+            this.ball.scoreTime = Date.now();
+            
             // Check for new high score
             const isNewHighScore = this.updateHighScore();
             
             // Trigger special effects
             this.triggerScoreEffects(isNewHighScore);
-            
+        }
+        
+        // Reset ball after it has fallen through the hoop (1 second delay)
+        if (this.ball.scored && Date.now() - this.ball.scoreTime > 1000) {
             this.resetBall();
         }
     }
@@ -457,17 +485,19 @@ class BasketballGame {
     }
     
     resetBall() {
-        // Increment miss counter
-        this.missCounter++;
-        
-        // Every 3 misses, remove a point from the score
-        if (this.missCounter >= 3 && this.score > 0) {
-            this.score--;
-            this.scoreElement.textContent = this.score;
-            this.missCounter = 0; // Reset the miss counter
+        // Increment miss counter only if ball didn't score
+        if (!this.ball.scored) {
+            this.missCounter++;
             
-            // Show penalty message
-            this.showPenaltyMessage();
+            // Every 3 misses, remove a point from the score
+            if (this.missCounter >= 3 && this.score > 0) {
+                this.score--;
+                this.scoreElement.textContent = this.score;
+                this.missCounter = 0; // Reset the miss counter
+                
+                // Show penalty message
+                this.showPenaltyMessage();
+            }
         }
         
         // Save high score before resetting
@@ -479,6 +509,8 @@ class BasketballGame {
         this.ball.vx = 0;
         this.ball.vy = 0;
         this.ball.isMoving = false;
+        this.ball.scored = false;    // Reset scored flag
+        this.ball.scoreTime = 0;     // Reset score timer
         this.isDragging = false;
     }
     
@@ -816,6 +848,34 @@ class BasketballGame {
         this.ctx.restore();
     }
     
+    drawSecondReferenceDot() {
+        // Calculate position two-thirds between basketball and hoop
+        const deltaX = this.hoop.x + (this.hoop.width / 2) - this.ball.originalX;
+        const dotX = this.ball.originalX + (deltaX * 2 / 3);
+        const dotY = this.ball.originalY; // Same level as the basketball
+        
+        this.ctx.save();
+        
+        // Draw the second reference dot with teleportation visual cue
+        this.ctx.beginPath();
+        this.ctx.arc(dotX, dotY, 5, 0, Math.PI * 2); // Slightly larger for better clicking
+        this.ctx.fillStyle = 'rgba(255, 200, 100, 0.9)'; // Light orange to distinguish from first reference dot
+        this.ctx.fill();
+        
+        // Add a glowing outline
+        this.ctx.strokeStyle = 'rgba(255, 150, 0, 0.8)';
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+        
+        // Add inner highlight
+        this.ctx.beginPath();
+        this.ctx.arc(dotX, dotY, 2, 0, Math.PI * 2);
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        this.ctx.fill();
+        
+        this.ctx.restore();
+    }
+    
     drawCenterDot() {
         // Draw a dot at the center of the basketball (only if ball is not at original position)
         const isAtOriginal = Math.abs(this.ball.x - this.ball.originalX) < 5 && Math.abs(this.ball.y - this.ball.originalY) < 5;
@@ -885,6 +945,7 @@ class BasketballGame {
         this.drawBall();
         this.drawCenterDot();
         this.drawReferenceDot();
+        this.drawSecondReferenceDot();
         this.drawStartingPositionDot();
         this.drawTrajectory();
         this.drawAimingArrow();

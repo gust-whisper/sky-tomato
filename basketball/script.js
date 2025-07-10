@@ -30,6 +30,8 @@ class BasketballGame {
             vy: 0,
             originalX: 100,
             originalY: 400,
+            currentResetX: 100,  // Track current reset position
+            currentResetY: 400,  // Track current reset position
             isMoving: false
         };
         
@@ -92,9 +94,67 @@ class BasketballGame {
         if (this.ball.isMoving) return;
         
         const mousePos = this.getMousePos(e);
+        
+        // Check basketball click first (highest priority)
         if (this.isPointInBall(mousePos.x, mousePos.y)) {
             this.isDragging = true;
             this.dragStart = { x: mousePos.x, y: mousePos.y };
+            return;
+        }
+        
+        // Check if clicking on reference dot (only if it's visible)
+        const deltaX = this.hoop.x + (this.hoop.width / 2) - this.ball.originalX;
+        const refDotX = this.ball.originalX + (deltaX / 3);
+        const refDotY = this.ball.originalY;
+        const refDotDistance = Math.sqrt((mousePos.x - refDotX) ** 2 + (mousePos.y - refDotY) ** 2);
+        
+        // Reference dot is always visible, so check it
+        if (refDotDistance <= 8) { // 8 pixel radius for easier clicking
+            // Only teleport if ball is not already at reference dot position
+            if (Math.abs(this.ball.x - refDotX) > 5 || Math.abs(this.ball.y - refDotY) > 5) {
+                this.ball.x = refDotX;
+                this.ball.y = refDotY;
+                // Update current reset position when teleporting
+                this.ball.currentResetX = refDotX;
+                this.ball.currentResetY = refDotY;
+            }
+            return;
+        }
+        
+        // Check if clicking on center dot (only if it's visible - ball not at original position)
+        const isAtOriginal = Math.abs(this.ball.x - this.ball.originalX) < 5 && Math.abs(this.ball.y - this.ball.originalY) < 5;
+        if (!isAtOriginal) {
+            const centerDotDistance = Math.sqrt((mousePos.x - this.ball.x) ** 2 + (mousePos.y - this.ball.y) ** 2);
+            
+            if (centerDotDistance <= 8) { // 8 pixel radius for easier clicking
+                // Only teleport if ball is not already at original position
+                if (Math.abs(this.ball.x - this.ball.originalX) > 5 || Math.abs(this.ball.y - this.ball.originalY) > 5) {
+                    this.ball.x = this.ball.originalX;
+                    this.ball.y = this.ball.originalY;
+                    // Update current reset position when teleporting
+                    this.ball.currentResetX = this.ball.originalX;
+                    this.ball.currentResetY = this.ball.originalY;
+                }
+                return;
+            }
+        }
+        
+        // Check if clicking on starting position dot (only if it's visible - ball not at starting position)
+        const isAtStartingPosition = Math.abs(this.ball.x - this.ball.originalX) < 5 && Math.abs(this.ball.y - this.ball.originalY) < 5;
+        if (!isAtStartingPosition) {
+            const startingDotDistance = Math.sqrt((mousePos.x - this.ball.originalX) ** 2 + (mousePos.y - this.ball.originalY) ** 2);
+            
+            if (startingDotDistance <= 8) { // 8 pixel radius for easier clicking
+                // Only teleport if ball is not already at starting position
+                if (Math.abs(this.ball.x - this.ball.originalX) > 5 || Math.abs(this.ball.y - this.ball.originalY) > 5) {
+                    this.ball.x = this.ball.originalX;
+                    this.ball.y = this.ball.originalY;
+                    // Update current reset position when teleporting
+                    this.ball.currentResetX = this.ball.originalX;
+                    this.ball.currentResetY = this.ball.originalY;
+                }
+                return;
+            }
         }
     }
     
@@ -117,6 +177,10 @@ class BasketballGame {
     shootBall() {
         const dx = this.dragStart.x - this.mouse.x;
         const dy = this.dragStart.y - this.mouse.y;
+        
+        // Update the current reset position to where the ball is being shot from
+        this.ball.currentResetX = this.ball.x;
+        this.ball.currentResetY = this.ball.y;
         
         // Calculate power based on distance
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -409,8 +473,9 @@ class BasketballGame {
         // Save high score before resetting
         this.updateHighScore();
         
-        this.ball.x = this.ball.originalX;
-        this.ball.y = this.ball.originalY;
+        // Reset to the position where the ball was shot from, not always the original position
+        this.ball.x = this.ball.currentResetX;
+        this.ball.y = this.ball.currentResetY;
         this.ball.vx = 0;
         this.ball.vy = 0;
         this.ball.isMoving = false;
@@ -723,6 +788,90 @@ class BasketballGame {
         this.ctx.restore();
     }
     
+    drawReferenceDot() {
+        // Calculate position one-third between basketball and hoop
+        const deltaX = this.hoop.x + (this.hoop.width / 2) - this.ball.originalX;
+        const dotX = this.ball.originalX + (deltaX / 3);
+        const dotY = this.ball.originalY; // Same level as the basketball
+        
+        this.ctx.save();
+        
+        // Draw the reference dot with teleportation visual cue
+        this.ctx.beginPath();
+        this.ctx.arc(dotX, dotY, 5, 0, Math.PI * 2); // Slightly larger for better clicking
+        this.ctx.fillStyle = 'rgba(100, 200, 255, 0.9)'; // Light blue to indicate it's special
+        this.ctx.fill();
+        
+        // Add a glowing outline
+        this.ctx.strokeStyle = 'rgba(0, 150, 255, 0.8)';
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+        
+        // Add inner highlight
+        this.ctx.beginPath();
+        this.ctx.arc(dotX, dotY, 2, 0, Math.PI * 2);
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        this.ctx.fill();
+        
+        this.ctx.restore();
+    }
+    
+    drawCenterDot() {
+        // Draw a dot at the center of the basketball (only if ball is not at original position)
+        const isAtOriginal = Math.abs(this.ball.x - this.ball.originalX) < 5 && Math.abs(this.ball.y - this.ball.originalY) < 5;
+        
+        if (!isAtOriginal) {
+            this.ctx.save();
+            
+            // Draw the center dot with teleportation visual cue
+            this.ctx.beginPath();
+            this.ctx.arc(this.ball.x, this.ball.y, 5, 0, Math.PI * 2); // Slightly larger for better clicking
+            this.ctx.fillStyle = 'rgba(255, 100, 100, 0.9)'; // Light red to indicate it's special
+            this.ctx.fill();
+            
+            // Add a glowing outline
+            this.ctx.strokeStyle = 'rgba(255, 50, 50, 0.8)';
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+            
+            // Add inner highlight
+            this.ctx.beginPath();
+            this.ctx.arc(this.ball.x, this.ball.y, 2, 0, Math.PI * 2);
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            this.ctx.fill();
+            
+            this.ctx.restore();
+        }
+    }
+    
+    drawStartingPositionDot() {
+        // Draw a dot at the starting position (only if ball is not there)
+        const isAtStartingPosition = Math.abs(this.ball.x - this.ball.originalX) < 5 && Math.abs(this.ball.y - this.ball.originalY) < 5;
+        
+        if (!isAtStartingPosition) {
+            this.ctx.save();
+            
+            // Draw the starting position dot with teleportation visual cue
+            this.ctx.beginPath();
+            this.ctx.arc(this.ball.originalX, this.ball.originalY, 5, 0, Math.PI * 2); // Slightly larger for better clicking
+            this.ctx.fillStyle = 'rgba(100, 255, 100, 0.9)'; // Light green to indicate starting position
+            this.ctx.fill();
+            
+            // Add a glowing outline
+            this.ctx.strokeStyle = 'rgba(50, 200, 50, 0.8)';
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+            
+            // Add inner highlight
+            this.ctx.beginPath();
+            this.ctx.arc(this.ball.originalX, this.ball.originalY, 2, 0, Math.PI * 2);
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            this.ctx.fill();
+            
+            this.ctx.restore();
+        }
+    }
+    
     draw() {
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -734,6 +883,9 @@ class BasketballGame {
         // Draw game elements
         this.drawHoop();
         this.drawBall();
+        this.drawCenterDot();
+        this.drawReferenceDot();
+        this.drawStartingPositionDot();
         this.drawTrajectory();
         this.drawAimingArrow();
         this.drawParticles();

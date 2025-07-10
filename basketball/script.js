@@ -503,14 +503,14 @@ class BasketballGame {
     drawAimingArrow() {
         if (!this.isDragging || this.ball.isMoving) return;
         
-        const dx = this.mouse.x - this.ball.x;
-        const dy = this.mouse.y - this.ball.y;
+        const dx = this.dragStart.x - this.mouse.x;
+        const dy = this.dragStart.y - this.mouse.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         if (distance < 20) return; // Don't show arrow for very small movements
         
-        // Calculate opposite direction
-        const angle = Math.atan2(-dy, -dx);
+        // Calculate direction (same as trajectory line for consistency)
+        const angle = Math.atan2(dy, dx);
         const arrowLength = Math.min(distance * 0.8, 100);
         
         const arrowX = this.ball.x + Math.cos(angle) * arrowLength;
@@ -518,30 +518,86 @@ class BasketballGame {
         
         this.ctx.save();
         
-        // Arrow line
+        // Calculate power for visual feedback
+        const power = Math.min(distance / 6, 25);
+        const powerRatio = power / 25; // Normalize to 0-1
+        
+        // Arrow shaft width based on power
+        const shaftWidth = 4 + powerRatio * 8; // 4-12 pixels wide
+        
+        // Create gradient for the arrow
+        const gradient = this.ctx.createLinearGradient(
+            this.ball.x, this.ball.y, arrowX, arrowY
+        );
+        gradient.addColorStop(0, `rgba(255, 0, 0, 0.8)`);
+        gradient.addColorStop(0.5, `rgba(255, 100, 0, 0.9)`);
+        gradient.addColorStop(1, `rgba(255, 150, 0, 1)`);
+        
+        // Draw arrow shaft as a thick line with rounded ends
         this.ctx.beginPath();
         this.ctx.moveTo(this.ball.x, this.ball.y);
         this.ctx.lineTo(arrowX, arrowY);
-        this.ctx.strokeStyle = '#FF0000';
-        this.ctx.lineWidth = 3;
+        this.ctx.strokeStyle = gradient;
+        this.ctx.lineWidth = shaftWidth;
+        this.ctx.lineCap = 'round';
         this.ctx.stroke();
         
-        // Arrow head
-        const headSize = 15;
+        // Calculate arrow head size based on power
+        const headSize = 15 + powerRatio * 10; // 15-25 pixels
+        const headWidth = 8 + powerRatio * 6; // 8-14 pixels
+        
+        // Draw 2D arrow head
         this.ctx.beginPath();
         this.ctx.moveTo(arrowX, arrowY);
+        
+        // Left side of arrow head
         this.ctx.lineTo(
-            arrowX - headSize * Math.cos(angle - 0.5),
-            arrowY - headSize * Math.sin(angle - 0.5)
+            arrowX - headSize * Math.cos(angle - 0.4) - headWidth * Math.sin(angle),
+            arrowY - headSize * Math.sin(angle - 0.4) + headWidth * Math.cos(angle)
         );
-        this.ctx.moveTo(arrowX, arrowY);
+        
+        // Back of arrow head (creates the base)
         this.ctx.lineTo(
-            arrowX - headSize * Math.cos(angle + 0.5),
-            arrowY - headSize * Math.sin(angle + 0.5)
+            arrowX - (headSize * 0.6) * Math.cos(angle),
+            arrowY - (headSize * 0.6) * Math.sin(angle)
         );
-        this.ctx.strokeStyle = '#FF0000';
-        this.ctx.lineWidth = 3;
+        
+        // Right side of arrow head
+        this.ctx.lineTo(
+            arrowX - headSize * Math.cos(angle + 0.4) + headWidth * Math.sin(angle),
+            arrowY - headSize * Math.sin(angle + 0.4) - headWidth * Math.cos(angle)
+        );
+        
+        this.ctx.closePath();
+        
+        // Fill the arrow head with gradient
+        const headGradient = this.ctx.createRadialGradient(
+            arrowX, arrowY, 0, arrowX, arrowY, headSize
+        );
+        headGradient.addColorStop(0, `rgba(255, 200, 0, 1)`);
+        headGradient.addColorStop(1, `rgba(255, 0, 0, 0.8)`);
+        
+        this.ctx.fillStyle = headGradient;
+        this.ctx.fill();
+        
+        // Add a darker outline to the arrow head
+        this.ctx.strokeStyle = 'rgba(150, 0, 0, 0.8)';
+        this.ctx.lineWidth = 2;
         this.ctx.stroke();
+        
+        // Add power indicator (small circles along the shaft)
+        const numIndicators = Math.floor(powerRatio * 5) + 1;
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        
+        for (let i = 1; i <= numIndicators; i++) {
+            const indicatorRatio = i / (numIndicators + 1);
+            const indicatorX = this.ball.x + Math.cos(angle) * arrowLength * indicatorRatio;
+            const indicatorY = this.ball.y + Math.sin(angle) * arrowLength * indicatorRatio;
+            
+            this.ctx.beginPath();
+            this.ctx.arc(indicatorX, indicatorY, 2, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
         
         this.ctx.restore();
     }

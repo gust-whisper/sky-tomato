@@ -4,4 +4,4 @@ Please create a basketball shooting game using html and javascript. Following ar
 3) The further the mouse is pulled away from the ball, the futher the basketball will shoot
 4) When the mouse is pulled away from the ball, the user can move it around to change the angle to shoot the basketball
 5) When user releases the mouse button, the basketball will be shoot out and follow a parabolic motion.
-6) When the basketball falls into the hoop, the user score a point..
+6) When the basketball falls into the hoop, the user score a point.

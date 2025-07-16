@@ -14,6 +14,11 @@ const levels = {
         question: "What are the first 10 digits of Pi?",
         correctAnswers: ["3141592653", "3.141592653"],
         successMessage: "🎉 Amazing! The first 10 digits of Pi are 3.141592653"
+    },
+    3: {
+        question: "What are the first 25 digits of Pi?",
+        correctAnswers: ["3141592653589793238462643", "3.141592653589793238462643"],
+        successMessage: "🎉 Incredible! You've mastered the first 25 digits of Pi: 3.141592653589793238462643"
     }
 };
 

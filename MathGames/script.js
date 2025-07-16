@@ -2,6 +2,8 @@
 
 // Game state
 let currentLevel = 1;
+let levelStartInput = ''; // Store the input value when level starts
+let isLevelTransitioning = false; // Prevent actions during level transitions
 
 // Level configuration
 const levels = {
@@ -19,6 +21,21 @@ const levels = {
         question: "What are the first 25 digits of Pi?",
         correctAnswers: ["3141592653589793238462643", "3.141592653589793238462643"],
         successMessage: "🎉 Incredible! You've mastered the first 25 digits of Pi: 3.141592653589793238462643"
+    },
+    4: {
+        question: "What are the first 50 digits of Pi?",
+        correctAnswers: ["31415926535897932384626433832795028841971693993751", "3.1415926535897932384626433832795028841971693993751"],
+        successMessage: "🎉 Outstanding! You've conquered the first 50 digits of Pi: 3.1415926535897932384626433832795028841971693993751"
+    },
+    5: {
+        question: "What are the first 75 digits of Pi?",
+        correctAnswers: ["314159265358979323846264338327950288419716939937510582097494459230781640628", "3.14159265358979323846264338327950288419716939937510582097494459230781640628"],
+        successMessage: "🎉 Exceptional! You've mastered the first 75 digits of Pi: 3.14159265358979323846264338327950288419716939937510582097494459230781640628"
+    },
+    6: {
+        question: "What are the first 100 digits of Pi?",
+        correctAnswers: ["3141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067", "3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067"],
+        successMessage: "🎉 LEGENDARY! You are a Pi master with 100 digits: 3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067"
     }
 };
 
@@ -49,21 +66,28 @@ function checkAnswer() {
         
         // Show next level button if not on the last level
         if (currentLevel < Object.keys(levels).length) {
+            isLevelTransitioning = true; // Start transition
             setTimeout(() => {
                 nextLevelBtn.style.display = 'flex';
                 setTimeout(() => {
                     nextLevelBtn.classList.add('show');
+                    isLevelTransitioning = false; // Transition complete
                 }, 50);
             }, 1000);
         }
     } else {
-        const correctAnswer = levelConfig.correctAnswers[1] || levelConfig.correctAnswers[0];
-        showResult(`❌ Incorrect. The correct answer is ${correctAnswer} (you entered: ${userAnswer})`, 'incorrect');
+        // Revert input to what it was when level started
+        document.getElementById('answerInput').value = levelStartInput;
+        updateDigitCounter();
+        showResult(`❌ Incorrect. Try again!`, 'incorrect');
     }
 }
 
 // Function to go to the next level
 function nextLevel() {
+    if (isLevelTransitioning) return; // Prevent multiple calls during transition
+    
+    isLevelTransitioning = true;
     currentLevel++;
     const levelConfig = levels[currentLevel];
     
@@ -76,6 +100,9 @@ function nextLevel() {
         document.getElementById('nextLevelBtn').style.display = 'none';
         document.getElementById('nextLevelBtn').classList.remove('show');
         
+        // Store the current input as the level start input
+        levelStartInput = document.getElementById('answerInput').value;
+        
         // Update digit counter with current input
         updateDigitCounter();
         
@@ -83,6 +110,11 @@ function nextLevel() {
         const input = document.getElementById('answerInput');
         input.focus();
         input.setSelectionRange(input.value.length, input.value.length);
+        
+        // Allow transitions again after UI updates
+        setTimeout(() => {
+            isLevelTransitioning = false;
+        }, 100);
     }
 }
 
@@ -131,7 +163,20 @@ function goBack() {
 // Add event listener for Enter key and input changes
 document.getElementById('answerInput').addEventListener('keypress', function(event) {
     if (event.key === 'Enter') {
-        checkAnswer();
+        // Prevent actions during level transitions
+        if (isLevelTransitioning) {
+            return;
+        }
+        
+        // Check if next level button is visible
+        const nextLevelBtn = document.getElementById('nextLevelBtn');
+        if (nextLevelBtn.style.display === 'flex' && nextLevelBtn.classList.contains('show')) {
+            // If next level button is visible, go to next level
+            nextLevel();
+        } else {
+            // Otherwise, check the answer
+            checkAnswer();
+        }
     }
 });
 
@@ -142,6 +187,7 @@ document.getElementById('answerInput').addEventListener('input', updateDigitCoun
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('answerInput').focus();
     updateDigitCounter(); // Initialize counter
+    levelStartInput = document.getElementById('answerInput').value; // Initialize level start input
 });
 
 // Add CSS animation for celebration

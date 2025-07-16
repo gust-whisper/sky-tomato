@@ -71,16 +71,18 @@ function nextLevel() {
         // Update UI for new level
         document.getElementById('levelIndicator').textContent = `Level ${currentLevel}`;
         document.getElementById('question').textContent = levelConfig.question;
-        document.getElementById('answerInput').value = '';
+        // Don't clear the input - keep the previous answer so user can continue typing
         document.getElementById('result').classList.remove('show', 'correct', 'incorrect');
         document.getElementById('nextLevelBtn').style.display = 'none';
         document.getElementById('nextLevelBtn').classList.remove('show');
         
-        // Reset digit counter
+        // Update digit counter with current input
         updateDigitCounter();
         
-        // Focus on input
-        document.getElementById('answerInput').focus();
+        // Focus on input and move cursor to end
+        const input = document.getElementById('answerInput');
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
     }
 }
 
@@ -121,9 +123,9 @@ function updateDigitCounter() {
     counter.textContent = digitCount;
 }
 
-// Function to go back to the portfolio
+// Function to go back to the Math Games hub
 function goBack() {
-    window.location.href = '../index.html';
+    window.location.href = 'index.html';
 }
 
 // Add event listener for Enter key and input changes

@@ -65,9 +65,20 @@ class BasketballGame {
     }
     
     initEventListeners() {
+        // Mouse events
         this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
         this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
         this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+        
+        // Touch events
+        this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+        this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
+        this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+        
+        // Prevent default touch behaviors to avoid conflicts
+        this.canvas.addEventListener('touchstart', (e) => e.preventDefault());
+        this.canvas.addEventListener('touchmove', (e) => e.preventDefault());
+        this.canvas.addEventListener('touchend', (e) => e.preventDefault());
         
         // Remove the mouseleave auto-shoot behavior
         // this.canvas.addEventListener('mouseleave', (e) => this.handleMouseUp(e));
@@ -188,6 +199,124 @@ class BasketballGame {
     }
     
     handleMouseUp(e) {
+        if (this.isDragging && !this.ball.isMoving) {
+            this.shootBall();
+        }
+        this.isDragging = false;
+    }
+    
+    // Touch event handlers for mobile support
+    getTouchPos(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const touch = e.touches[0] || e.changedTouches[0];
+        return {
+            x: touch.clientX - rect.left,
+            y: touch.clientY - rect.top
+        };
+    }
+    
+    handleTouchStart(e) {
+        e.preventDefault(); // Prevent scrolling and other default behaviors
+        if (this.ball.isMoving) return;
+        
+        const touchPos = this.getTouchPos(e);
+        
+        // Check basketball touch first (highest priority)
+        if (this.isPointInBall(touchPos.x, touchPos.y)) {
+            this.isDragging = true;
+            this.dragStart = { x: touchPos.x, y: touchPos.y };
+            this.mouse = touchPos; // Update mouse position for consistency
+            return;
+        }
+        
+        // Check if touching on reference dot (only if it's visible)
+        const deltaX = this.hoop.x + (this.hoop.width / 2) - this.ball.originalX;
+        const refDotX = this.ball.originalX + (deltaX / 3);
+        const refDotY = this.ball.originalY;
+        const refDotDistance = Math.sqrt((touchPos.x - refDotX) ** 2 + (touchPos.y - refDotY) ** 2);
+        
+        // Reference dot is always visible, so check it
+        if (refDotDistance <= 15) { // Larger touch area for better mobile experience
+            // Only teleport if ball is not already at reference dot position
+            if (Math.abs(this.ball.x - refDotX) > 5 || Math.abs(this.ball.y - refDotY) > 5) {
+                this.ball.x = refDotX;
+                this.ball.y = refDotY;
+                // Update current reset position when teleporting
+                this.ball.currentResetX = refDotX;
+                this.ball.currentResetY = refDotY;
+            }
+            return;
+        }
+        
+        // Check if touching on second reference dot (two-thirds position)
+        const refDot2X = this.ball.originalX + (deltaX * 2 / 3);
+        const refDot2Y = this.ball.originalY;
+        const refDot2Distance = Math.sqrt((touchPos.x - refDot2X) ** 2 + (touchPos.y - refDot2Y) ** 2);
+        
+        // Second reference dot is always visible, so check it
+        if (refDot2Distance <= 15) { // Larger touch area for better mobile experience
+            // Only teleport if ball is not already at second reference dot position
+            if (Math.abs(this.ball.x - refDot2X) > 5 || Math.abs(this.ball.y - refDot2Y) > 5) {
+                this.ball.x = refDot2X;
+                this.ball.y = refDot2Y;
+                // Update current reset position when teleporting
+                this.ball.currentResetX = refDot2X;
+                this.ball.currentResetY = refDot2Y;
+            }
+            return;
+        }
+        
+        // Check if touching on center dot (only if it's visible - ball not at original position)
+        const isAtOriginal = Math.abs(this.ball.x - this.ball.originalX) < 5 && Math.abs(this.ball.y - this.ball.originalY) < 5;
+        if (!isAtOriginal) {
+            const centerDotDistance = Math.sqrt((touchPos.x - this.ball.x) ** 2 + (touchPos.y - this.ball.y) ** 2);
+            
+            if (centerDotDistance <= 15) { // Larger touch area for better mobile experience
+                // Only teleport if ball is not already at original position
+                if (Math.abs(this.ball.x - this.ball.originalX) > 5 || Math.abs(this.ball.y - this.ball.originalY) > 5) {
+                    this.ball.x = this.ball.originalX;
+                    this.ball.y = this.ball.originalY;
+                    // Update current reset position when teleporting
+                    this.ball.currentResetX = this.ball.originalX;
+                    this.ball.currentResetY = this.ball.originalY;
+                }
+                return;
+            }
+        }
+        
+        // Check if touching on starting position dot (only if it's visible - ball not at starting position)
+        const isAtStartingPosition = Math.abs(this.ball.x - this.ball.originalX) < 5 && Math.abs(this.ball.y - this.ball.originalY) < 5;
+        if (!isAtStartingPosition) {
+            const startingDotDistance = Math.sqrt((touchPos.x - this.ball.originalX) ** 2 + (touchPos.y - this.ball.originalY) ** 2);
+            
+            if (startingDotDistance <= 15) { // Larger touch area for better mobile experience
+                // Only teleport if ball is not already at starting position
+                if (Math.abs(this.ball.x - this.ball.originalX) > 5 || Math.abs(this.ball.y - this.ball.originalY) > 5) {
+                    this.ball.x = this.ball.originalX;
+                    this.ball.y = this.ball.originalY;
+                    // Update current reset position when teleporting
+                    this.ball.currentResetX = this.ball.originalX;
+                    this.ball.currentResetY = this.ball.originalY;
+                }
+                return;
+            }
+        }
+    }
+    
+    handleTouchMove(e) {
+        e.preventDefault(); // Prevent scrolling
+        if (!this.isDragging) return;
+        
+        const touchPos = this.getTouchPos(e);
+        this.mouse = touchPos;
+        
+        if (this.isDragging && !this.ball.isMoving) {
+            // Keep ball in place, just update touch position for arrow
+        }
+    }
+    
+    handleTouchEnd(e) {
+        e.preventDefault(); // Prevent default behaviors
         if (this.isDragging && !this.ball.isMoving) {
             this.shootBall();
         }

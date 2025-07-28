@@ -92,6 +92,48 @@ body {
     border-radius: 10px;
     background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 60%, #90EE90 60%, #228B22 100%);
     cursor: pointer;
+    /* Touch-friendly improvements */
+    touch-action: none; /* Disable default touch behaviors like scrolling */
+    user-select: none; /* Prevent text selection during touch */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Improve touch experience for mobile devices */
+@media (max-width: 768px) {
+    .game-container {
+        padding: 10px;
+        margin: 10px;
+    }
+    
+    .canvas-wrapper {
+        overflow: hidden; /* Prevent scrolling when touching canvas */
+    }
+    
+    #gameCanvas {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .trajectory-toggle {
+        /* Make toggle easier to tap on mobile */
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+    
+    .back-arrow {
+        /* Make back button easier to tap */
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+    }
+}
+
+/* Prevent touch highlights and selections globally */
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
 }
 
 .instructions {

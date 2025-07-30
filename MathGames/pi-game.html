@@ -49,6 +49,8 @@
             color: #444;
             margin-bottom: 2rem;
             font-weight: 500;
+            white-space: pre-line;
+            line-height: 1.6;
         }
 
         .input-container {
@@ -240,6 +242,40 @@
             font-size: 3rem;
             color: #667eea;
             margin-bottom: 1rem;
+        }
+
+        .congratulations-level .pi-symbol {
+            font-size: 4rem;
+            background: linear-gradient(45deg, #ff6b6b, #ffa500, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: congratsGlow 2s ease-in-out infinite alternate;
+        }
+
+        .congratulations-level h1 {
+            font-size: 3rem;
+            animation: congratsGlow 2s ease-in-out infinite alternate;
+        }
+
+        .congratulations-level .question {
+            font-size: 1.3rem;
+            background: linear-gradient(45deg, #ff6b6b, #ffa500, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: congratsGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes congratsGlow {
+            0% { 
+                filter: brightness(1);
+                transform: scale(1);
+            }
+            100% { 
+                filter: brightness(1.2);
+                transform: scale(1.05);
+            }
         }
 
         @media (max-width: 768px) {

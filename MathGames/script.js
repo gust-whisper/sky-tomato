@@ -44,16 +44,30 @@ const levels = {
     }
 };
 
-// Function to determine the appropriate level based on digit count
-function getLevelForDigitCount(digitCount) {
-    // Level requirements (minimum digits needed to COMPLETE each level)
-    // If you enter enough digits to complete a level, you advance to the NEXT level
-    if (digitCount >= 100) return 7; // 100+ digits = completed level 6, advance to congratulations level 7
-    if (digitCount >= 75) return 6;  // 75+ digits = completed level 5, advance to level 6
-    if (digitCount >= 50) return 5;  // 50+ digits = completed level 4, advance to level 5
-    if (digitCount >= 25) return 4;  // 25+ digits = completed level 3, advance to level 4
-    if (digitCount >= 10) return 3;  // 10+ digits = completed level 2, advance to level 3
-    if (digitCount >= 3) return 2;   // 3+ digits = completed level 1, advance to level 2
+// Function to check if the user has enough digits to pass the current level
+function hasPassedCurrentLevel(digitCount, currentLevel) {
+    const requirements = {
+        1: 3,   // Level 1 requires exactly 3 digits
+        2: 10,  // Level 2 requires exactly 10 digits
+        3: 25,  // Level 3 requires exactly 25 digits
+        4: 50,  // Level 4 requires exactly 50 digits
+        5: 75,  // Level 5 requires exactly 75 digits
+        6: 100, // Level 6 requires exactly 100 digits
+        7: 0    // Level 7 is congratulations, no requirement
+    };
+    
+    return digitCount >= requirements[currentLevel];
+}
+
+// Function to determine what level the user should advance to based on digit count
+function getAdvanceLevel(digitCount) {
+    // This function determines how many levels to skip based on exceptional performance
+    if (digitCount >= 100) return 7; // 100+ digits = skip to congratulations level 7
+    if (digitCount >= 75) return 6;  // 75+ digits = skip to level 6
+    if (digitCount >= 50) return 5;  // 50+ digits = skip to level 5
+    if (digitCount >= 25) return 4;  // 25+ digits = skip to level 4
+    if (digitCount >= 10) return 3;  // 10+ digits = skip to level 3
+    if (digitCount >= 3) return 2;   // 3+ digits = skip to level 2
     return 1; // Less than 3 digits = stay at level 1
 }
 
@@ -98,25 +112,26 @@ function checkAnswer() {
     // Count the digits entered (excluding decimal point)
     const digitCount = countDigits(userAnswer);
     
-    // Determine the appropriate level for this digit count
-    const targetLevel = getLevelForDigitCount(digitCount);
-    
-    // Check if user has entered enough digits to qualify for any level
-    if (digitCount < 3) {
-        showResult(`You need at least 3 digits for Level 1. You entered ${digitCount}.`, 'incorrect');
+    // Check if the user has enough digits to pass the current level
+    if (!hasPassedCurrentLevel(digitCount, currentLevel)) {
+        const requiredDigits = getLevelDigitRequirement(currentLevel);
+        showResult(`❌ Not enough digits for Level ${currentLevel}. You need ${requiredDigits} digits, but entered ${digitCount}.`, 'incorrect');
         return;
     }
     
-    // If the target level is higher than the current level, advance automatically
-    if (targetLevel > currentLevel) {
-        showResult(`🎉 Incredible! You entered ${digitCount} correct digits of Pi! Advancing to Level ${targetLevel}!`, 'correct');
+    // Check if user can advance multiple levels (exceptional performance)
+    const advanceLevel = getAdvanceLevel(digitCount);
+    
+    if (advanceLevel > currentLevel + 1) {
+        // User entered enough digits to skip levels
+        showResult(`🎉 INCREDIBLE! You entered ${digitCount} correct digits of Pi! Skipping to Level ${advanceLevel}!`, 'correct');
         celebrateCorrectAnswer();
         
         // Advance directly to the target level
         setTimeout(() => {
-            advanceToLevel(targetLevel);
+            advanceToLevel(advanceLevel);
         }, 2000);
-    } else if (targetLevel === currentLevel) {
+    } else {
         // User completed the current level correctly
         if (currentLevel === 7) {
             // Special handling for congratulations level - no interaction needed
@@ -142,9 +157,6 @@ function checkAnswer() {
                 showResult(`🎉 LEGENDARY! You are a true Pi master with ${digitCount} digits!`, 'correct');
             }
         }
-    } else {
-        // Target level is lower than current level (shouldn't happen normally, but handle gracefully)
-        showResult(`You need at least ${getLevelDigitRequirement(currentLevel)} digits for Level ${currentLevel}. You entered ${digitCount}.`, 'incorrect');
     }
 }
 
@@ -177,15 +189,22 @@ function advanceToLevel(targetLevel) {
         
         // Add special styling for congratulations level
         const gameContainer = document.querySelector('.game-container');
+        const levelSelector = document.getElementById('levelSelector');
+        
         if (currentLevel === 7) {
             gameContainer.classList.add('congratulations-level');
             // Hide the input and buttons for congratulations level
             document.querySelector('.input-container').style.display = 'none';
             document.querySelector('.button-container').style.display = 'none';
+            // Show level selector on level 7
+            levelSelector.style.display = 'block';
+            updateLevelButtons();
         } else {
             gameContainer.classList.remove('congratulations-level');
             document.querySelector('.input-container').style.display = 'block';
             document.querySelector('.button-container').style.display = 'flex';
+            // Hide level selector on other levels
+            levelSelector.style.display = 'none';
         }
         
         document.getElementById('result').classList.remove('show', 'correct', 'incorrect');
@@ -210,6 +229,63 @@ function advanceToLevel(targetLevel) {
             isLevelTransitioning = false;
         }, 100);
     }
+}
+
+// Function to handle level selection
+function selectLevel(level) {
+    if (level === 8) {
+        // Level 8 is locked
+        showResult("🔒 Level 8 is coming soon! Stay tuned for more Pi challenges!", 'incorrect');
+        return;
+    }
+    
+    if (level >= 1 && level <= 7) {
+        // Clear any existing results
+        document.getElementById('result').classList.remove('show', 'correct', 'incorrect');
+        
+        // If selecting current level, just show a message
+        if (level === currentLevel) {
+            showResult(`🎯 You are already on Level ${level}!`, 'correct');
+            return;
+        }
+        
+        // Navigate to selected level
+        advanceToLevel(level);
+        
+        // If going to a level other than 7, clear the input and reset
+        if (level !== 7) {
+            const input = document.getElementById('answerInput');
+            input.value = '';
+            levelStartInput = '';
+            updateDigitCounter();
+            input.focus();
+        }
+        
+        showResult(`🎯 Switched to Level ${level}!`, 'correct');
+    }
+}
+
+// Function to update level button states
+function updateLevelButtons() {
+    const buttons = document.querySelectorAll('.level-btn');
+    buttons.forEach((button, index) => {
+        const level = index + 1;
+        
+        if (level <= 7) {
+            // Remove all state classes first
+            button.classList.remove('completed', 'current', 'locked');
+            
+            if (level === currentLevel) {
+                button.classList.add('current');
+            } else if (level < currentLevel || level <= 7) {
+                // All levels 1-7 are completed since we're on level 7
+                button.classList.add('completed');
+            }
+        } else {
+            // Level 8 is always locked
+            button.classList.add('locked');
+        }
+    });
 }
 
 // Function to go to the next level

@@ -411,8 +411,14 @@ function updateLevelButtons() {
                 // Level 8: green if user has reached it, locked if not
                 if (hasReachedLevel8) {
                     button.classList.add('completed');
+                    // Change button content from lock icon to "8"
+                    button.innerHTML = '8';
+                    button.title = 'Level 8 - Cheater Level!';
                 } else {
                     button.classList.add('locked');
+                    // Keep lock icon when locked
+                    button.innerHTML = '<span class="lock-icon">🔒</span>';
+                    button.title = 'Level 8 - Enter 200+ digits to unlock!';
                 }
             } else if (level < currentLevel || (currentLevel >= 7 && level <= 7)) {
                 // Levels 1-7 are completed if we're on level 7 or higher

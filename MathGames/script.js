@@ -551,8 +551,8 @@ document.head.appendChild(style);
 function handleIncorrectAnswer() {
     consecutiveIncorrectCount++;
     
-    // Show hint button after 10 consecutive incorrect answers
-    if (consecutiveIncorrectCount >= 10 && !hintButtonShown) {
+    // Show hint button after 5 consecutive incorrect answers
+    if (consecutiveIncorrectCount >= 5 && !hintButtonShown) {
         showHintButton();
     }
 }
@@ -577,4 +577,12 @@ function showHintButton() {
 function openHint() {
     // Open the YouTube video in a new tab
     window.open('https://www.youtube.com/watch?v=3HRkKznJoZA&list=RD3HRkKznJoZA&start_radio=1', '_blank');
+    
+    // Hide the hint button and reset tracking variables
+    const hintBtn = document.getElementById('hintBtn');
+    hintBtn.classList.remove('show');
+    
+    // Reset the tracking variables so the hint can appear again after 5 more failures
+    consecutiveIncorrectCount = 0;
+    hintButtonShown = false;
 }

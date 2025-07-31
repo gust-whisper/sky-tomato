@@ -185,6 +185,7 @@
             justify-content: center;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             position: relative;
+            margin: 2rem auto 1rem auto;
         }
 
         .return-to-level7-btn.show {
@@ -640,11 +641,12 @@
             </div>
         </div>
         
+        <!-- Return to Level 7 Button (shown when appropriate) -->
+        <button id="returnToLevel7Btn" class="return-to-level7-btn" onclick="returnToLevel7()" title="Return to Level 7">
+            7
+        </button>
+        
         <div class="button-container">
-            <button id="returnToLevel7Btn" class="return-to-level7-btn" onclick="returnToLevel7()" title="Return to Level 7">
-                7
-            </button>
-            
             <button class="submit-btn" onclick="checkAnswer()">
                 <span class="checkmark">✓</span>
                 Check Answer

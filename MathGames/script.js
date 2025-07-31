@@ -216,16 +216,18 @@ function advanceToLevel(targetLevel) {
             // Add special "cheater" styling for level 8
             if (currentLevel === 8) {
                 gameContainer.classList.add('cheater-level');
+                // On level 8, hide level selector and just show return to level 7 button
+                levelSelector.style.display = 'none';
             } else {
                 gameContainer.classList.remove('cheater-level');
+                // Show level selector on level 7
+                levelSelector.style.display = 'block';
+                updateLevelButtons();
             }
             
             // Hide the input and buttons for congratulations/legendary levels
             document.querySelector('.input-container').style.display = 'none';
             document.querySelector('.button-container').style.display = 'none';
-            // Show level selector on level 7 and 8
-            levelSelector.style.display = 'block';
-            updateLevelButtons();
             // Hide level 8 challenge if it's showing
             hideLevel8Challenge();
         } else {
@@ -251,8 +253,8 @@ function advanceToLevel(targetLevel) {
         // Update digit counter with current input
         updateDigitCounter();
         
-        // Focus on input and move cursor to end (only if not congratulations level)
-        if (currentLevel !== 7) {
+        // Focus on input and move cursor to end (only if not congratulations/cheater levels)
+        if (currentLevel !== 7 && currentLevel !== 8) {
             const input = document.getElementById('answerInput');
             input.focus();
             input.setSelectionRange(input.value.length, input.value.length);
@@ -277,11 +279,12 @@ function returnToLevel7() {
 function updateReturnToLevel7Button() {
     const returnBtn = document.getElementById('returnToLevel7Btn');
     
-    if (hasReachedLevel7 && currentLevel !== 7 && currentLevel !== 8) {
-        // Show the button if user has reached level 7 and is not currently on level 7 or 8
+    // Show the button if user has reached level 7 and is currently on level 8, 
+    // or on other levels (but not level 7 itself)
+    if (hasReachedLevel7 && currentLevel !== 7) {
         returnBtn.classList.add('show');
     } else {
-        // Hide the button if user hasn't reached level 7 or is currently on level 7/8
+        // Hide the button if user hasn't reached level 7 or is currently on level 7
         returnBtn.classList.remove('show');
     }
 }
@@ -405,7 +408,7 @@ function updateLevelButtons() {
             if (level === currentLevel) {
                 button.classList.add('current');
             } else if (level === 8) {
-                // Level 8 is only unlocked if user has reached it
+                // Level 8: green if user has reached it, locked if not
                 if (hasReachedLevel8) {
                     button.classList.add('completed');
                 } else {

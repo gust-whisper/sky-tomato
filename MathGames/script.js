@@ -5,6 +5,7 @@ let currentLevel = 1;
 let levelStartInput = ''; // Store the input value when level starts
 let isLevelTransitioning = false; // Prevent actions during level transitions
 let hasReachedLevel7 = false; // Track if user has ever reached level 7
+let hasReachedLevel8 = false; // Track if user has ever reached level 8
 
 // Level configuration
 const levels = {
@@ -39,9 +40,14 @@ const levels = {
         successMessage: "🎉 LEGENDARY! You are a Pi master with 100 digits: 3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067"
     },
     7: {
-        question: "🏆 CONGRATULATIONS! 🏆\n\n🎉🎊 ULTIMATE PI MASTER! 🎊🎉\n\nYou have achieved the impossible and memorized 100+ digits of Pi!\n\n(And shame on anyone who just searched up 100 digits of pi and copy-pasted it into the bar to win this game... you know who you are! 😏)\n\nYou are now officially a Pi legend! 🥧✨",
+        question: "🏆 CONGRATULATIONS! 🏆\n\n🎉🎊 ULTIMATE PI MASTER! 🎊🎉\n\nYou have achieved the impossible and memorized 100+ digits of Pi!\n\n(And shame on anyone who just searched up digits of pi and copy-pasted them into the bar to win this game... you know who you are! 😏)\n\nYou are now officially a Pi legend! 🥧✨",
         correctAnswers: [], // No specific answers needed for this level
-        successMessage: "🎉🎊 ULTIMATE PI MASTER! 🎊🎉\n\nYou have achieved the impossible and memorized 100+ digits of Pi!\n\n(And shame on anyone who just searched up 100 digits of pi and copy-pasted it into the bar to win this game... you know who you are! 😏)\n\nYou are now officially a Pi legend! 🥧✨"
+        successMessage: "🎉🎊 ULTIMATE PI MASTER! 🎊🎉\n\nYou have achieved the impossible and memorized digits of Pi!\n\nYou are now officially a Pi legend! 🥧✨"
+    },
+    8: {
+        question: "🚨 LEVEL 8: ULTIMATE CHEATER DETECTED! 🚨\n\n🤖� SYSTEM ALERT: COPY-PASTE MASTER! �🤖\n\nSeriously? 200+ digits of Pi? Come on...\n\nWe all know you didn't memorize this. Nobody memorizes 200 digits of Pi! 📋✂️\n\nYou probably Googled \"first 200 digits of pi\" and copy-pasted it like the sneaky genius you are! 😏\n\n�️‍♂️ DETECTIVE MODE ACTIVATED: \n• Did you actually memorize this? (Press X to doubt)\n• Or did you just Google it? (Most likely scenario)\n• Are you even human? (Jury's still out)\n\n🏆 Congratulations on your superior Googling skills! 🏆\n\nYou've officially reached the \"I'm-too-lazy-to-actually-memorize-Pi\" level! 🎉",
+        correctAnswers: [], // No specific answers needed for this level
+        successMessage: "�🤖 ULTIMATE COPY-PASTE CHAMPION! 🤖�\n\nYour Googling skills are legendary!\n\nWe bow to your superior cheating abilities! 📋👑"
     }
 };
 
@@ -54,7 +60,8 @@ function hasPassedCurrentLevel(digitCount, currentLevel) {
         4: 50,  // Level 4 requires exactly 50 digits
         5: 75,  // Level 5 requires exactly 75 digits
         6: 100, // Level 6 requires exactly 100 digits
-        7: 0    // Level 7 is congratulations, no requirement
+        7: 100, // Level 7 requires at least 100 digits (congratulations level)
+        8: 200  // Level 8 requires at least 200 digits (legendary level)
     };
     
     return digitCount >= requirements[currentLevel];
@@ -63,7 +70,8 @@ function hasPassedCurrentLevel(digitCount, currentLevel) {
 // Function to determine what level the user should advance to based on digit count
 function getAdvanceLevel(digitCount) {
     // This function determines how many levels to skip based on exceptional performance
-    if (digitCount >= 100) return 7; // 100+ digits = skip to congratulations level 7
+    if (digitCount >= 200) return 8; // 200+ digits = level 8 (legendary level)
+    if (digitCount >= 100) return 7; // 100-199 digits = level 7 (congratulations level)
     if (digitCount >= 75) return 6;  // 75+ digits = skip to level 6
     if (digitCount >= 50) return 5;  // 50+ digits = skip to level 5
     if (digitCount >= 25) return 4;  // 25+ digits = skip to level 4
@@ -77,8 +85,8 @@ function isValidPiSequence(userInput) {
     // Remove dots from input for comparison
     const cleanInput = userInput.replace(/\./g, '');
     
-    // The correct Pi digits (without decimal point)
-    const piDigits = "3141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067";
+    // The correct Pi digits (without decimal point) - 200 digits
+    const piDigits = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819";
     
     // Check if the input matches Pi from the beginning
     return piDigits.startsWith(cleanInput);
@@ -134,11 +142,11 @@ function checkAnswer() {
         }, 2000);
     } else {
         // User completed the current level correctly
-        if (currentLevel === 7) {
-            // Special handling for congratulations level - no interaction needed
+        if (currentLevel === 7 || currentLevel === 8) {
+            // Special handling for congratulations and legendary levels - no interaction needed
             showResult(`🎉 You are already at the ultimate level! 🎉`, 'correct');
             celebrateCorrectAnswer();
-            // No next level button for congratulations level
+            // No next level button for congratulations/legendary levels
         } else {
             showResult(`🎉 Perfect! You've entered ${digitCount} correct digits of Pi!`, 'correct');
             celebrateCorrectAnswer();
@@ -170,7 +178,8 @@ function getLevelDigitRequirement(level) {
         4: 50,
         5: 75,
         6: 100,
-        7: 100 // Congratulations level
+        7: 100, // Congratulations level
+        8: 200  // Legendary level
     };
     return requirements[level] || 3;
 }
@@ -182,9 +191,12 @@ function advanceToLevel(targetLevel) {
     isLevelTransitioning = true;
     currentLevel = targetLevel;
     
-    // Track if user has reached level 7
+    // Track if user has reached level 7 or 8
     if (currentLevel >= 7) {
         hasReachedLevel7 = true;
+    }
+    if (currentLevel >= 8) {
+        hasReachedLevel8 = true;
     }
     
     const levelConfig = levels[currentLevel];
@@ -194,24 +206,36 @@ function advanceToLevel(targetLevel) {
         document.getElementById('levelIndicator').textContent = `Level ${currentLevel}`;
         document.getElementById('question').textContent = levelConfig.question;
         
-        // Add special styling for congratulations level
+        // Add special styling for congratulations and legendary levels
         const gameContainer = document.querySelector('.game-container');
         const levelSelector = document.getElementById('levelSelector');
         
-        if (currentLevel === 7) {
+        if (currentLevel === 7 || currentLevel === 8) {
             gameContainer.classList.add('congratulations-level');
-            // Hide the input and buttons for congratulations level
+            
+            // Add special "cheater" styling for level 8
+            if (currentLevel === 8) {
+                gameContainer.classList.add('cheater-level');
+            } else {
+                gameContainer.classList.remove('cheater-level');
+            }
+            
+            // Hide the input and buttons for congratulations/legendary levels
             document.querySelector('.input-container').style.display = 'none';
             document.querySelector('.button-container').style.display = 'none';
-            // Show level selector on level 7
+            // Show level selector on level 7 and 8
             levelSelector.style.display = 'block';
             updateLevelButtons();
+            // Hide level 8 challenge if it's showing
+            hideLevel8Challenge();
         } else {
-            gameContainer.classList.remove('congratulations-level');
+            gameContainer.classList.remove('congratulations-level', 'cheater-level');
             document.querySelector('.input-container').style.display = 'block';
             document.querySelector('.button-container').style.display = 'flex';
             // Hide level selector on other levels
             levelSelector.style.display = 'none';
+            // Also hide level 8 challenge
+            hideLevel8Challenge();
         }
         
         // Update return to level 7 button visibility
@@ -253,11 +277,11 @@ function returnToLevel7() {
 function updateReturnToLevel7Button() {
     const returnBtn = document.getElementById('returnToLevel7Btn');
     
-    if (hasReachedLevel7 && currentLevel !== 7) {
-        // Show the button if user has reached level 7 and is not currently on level 7
+    if (hasReachedLevel7 && currentLevel !== 7 && currentLevel !== 8) {
+        // Show the button if user has reached level 7 and is not currently on level 7 or 8
         returnBtn.classList.add('show');
     } else {
-        // Hide the button if user hasn't reached level 7 or is currently on level 7
+        // Hide the button if user hasn't reached level 7 or is currently on level 7/8
         returnBtn.classList.remove('show');
     }
 }
@@ -265,12 +289,15 @@ function updateReturnToLevel7Button() {
 // Function to handle level selection
 function selectLevel(level) {
     if (level === 8) {
-        // Level 8 is locked
-        showResult("🔒 Level 8 is coming soon! Stay tuned for more Pi challenges!", 'incorrect');
-        return;
+        // Level 8 is only accessible if user has reached it
+        if (!hasReachedLevel8) {
+            // Show the hidden challenge input instead of a message
+            showLevel8Challenge();
+            return;
+        }
     }
     
-    if (level >= 1 && level <= 7) {
+    if (level >= 1 && level <= 8) {
         // Clear any existing results
         document.getElementById('result').classList.remove('show', 'correct', 'incorrect');
         
@@ -283,8 +310,8 @@ function selectLevel(level) {
         // Navigate to selected level
         advanceToLevel(level);
         
-        // If going to a level other than 7, clear the input and reset
-        if (level !== 7) {
+        // If going to a level other than 7 or 8, clear the input and reset
+        if (level !== 7 && level !== 8) {
             const input = document.getElementById('answerInput');
             input.value = '';
             levelStartInput = '';
@@ -296,24 +323,100 @@ function selectLevel(level) {
     }
 }
 
+// Function to show the level 8 challenge input
+function showLevel8Challenge() {
+    const challengeDiv = document.getElementById('level8Challenge');
+    const challengeInput = document.getElementById('level8Input');
+    
+    challengeDiv.style.display = 'block';
+    setTimeout(() => {
+        challengeDiv.classList.add('show');
+        challengeInput.focus();
+    }, 50);
+}
+
+// Function to hide the level 8 challenge input
+function hideLevel8Challenge() {
+    const challengeDiv = document.getElementById('level8Challenge');
+    challengeDiv.classList.remove('show');
+    setTimeout(() => {
+        challengeDiv.style.display = 'none';
+    }, 300);
+}
+
+// Function to update the level 8 counter
+function updateLevel8Counter() {
+    const input = document.getElementById('level8Input');
+    const counter = document.getElementById('level8Counter');
+    const digitCount = countDigits(input.value);
+    counter.textContent = digitCount;
+}
+
+// Function to check level 8 challenge input
+function checkLevel8Challenge() {
+    const userAnswer = document.getElementById('level8Input').value.trim();
+    const digitCount = countDigits(userAnswer);
+    const advanceBtn = document.getElementById('level8AdvanceBtn');
+    
+    // Check if the entered sequence is valid Pi digits
+    const isValidPi = isValidPiSequence(userAnswer);
+    
+    // Show/hide the advance button based on valid Pi digits and count
+    if (isValidPi && digitCount >= 200) {
+        advanceBtn.style.display = 'flex';
+        setTimeout(() => {
+            advanceBtn.classList.add('show');
+        }, 50);
+    } else {
+        advanceBtn.classList.remove('show');
+        setTimeout(() => {
+            if (!advanceBtn.classList.contains('show')) {
+                advanceBtn.style.display = 'none';
+            }
+        }, 300);
+    }
+}
+
+// Function to unlock level 8
+function unlockLevel8() {
+    const userAnswer = document.getElementById('level8Input').value.trim();
+    const digitCount = countDigits(userAnswer);
+    
+    // Double-check that conditions are met
+    if (isValidPiSequence(userAnswer) && digitCount >= 200) {
+        hasReachedLevel8 = true;
+        hideLevel8Challenge();
+        advanceToLevel(8);
+        showResult(`🚨 CHEATER ALERT! You entered ${digitCount} digits! We see what you did there... 🔍📋`, 'correct');
+        celebrateCorrectAnswer();
+    }
+}
+
 // Function to update level button states
 function updateLevelButtons() {
     const buttons = document.querySelectorAll('.level-btn');
     buttons.forEach((button, index) => {
         const level = index + 1;
         
-        if (level <= 7) {
+        if (level <= 8) {
             // Remove all state classes first
             button.classList.remove('completed', 'current', 'locked');
             
             if (level === currentLevel) {
                 button.classList.add('current');
-            } else if (level < currentLevel || level <= 7) {
-                // All levels 1-7 are completed since we're on level 7
+            } else if (level === 8) {
+                // Level 8 is only unlocked if user has reached it
+                if (hasReachedLevel8) {
+                    button.classList.add('completed');
+                } else {
+                    button.classList.add('locked');
+                }
+            } else if (level < currentLevel || (currentLevel >= 7 && level <= 7)) {
+                // Levels 1-7 are completed if we're on level 7 or higher
                 button.classList.add('completed');
             }
         } else {
-            // Level 8 is always locked
+            // Future levels are always locked
             button.classList.add('locked');
         }
     });
@@ -390,6 +493,24 @@ document.getElementById('answerInput').addEventListener('keypress', function(eve
 
 // Add event listener for input changes to update counter
 document.getElementById('answerInput').addEventListener('input', updateDigitCounter);
+
+// Add event listeners for level 8 challenge input
+document.addEventListener('DOMContentLoaded', function() {
+    const level8Input = document.getElementById('level8Input');
+    
+    // Update counter on input
+    level8Input.addEventListener('input', function() {
+        updateLevel8Counter();
+        checkLevel8Challenge();
+    });
+    
+    // Handle Enter key for level 8 input
+    level8Input.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            checkLevel8Challenge();
+        }
+    });
+});
 
 // Focus on input when page loads
 document.addEventListener('DOMContentLoaded', function() {

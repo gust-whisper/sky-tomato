@@ -6,6 +6,8 @@ let levelStartInput = ''; // Store the input value when level starts
 let isLevelTransitioning = false; // Prevent actions during level transitions
 let hasReachedLevel7 = false; // Track if user has ever reached level 7
 let hasReachedLevel8 = false; // Track if user has ever reached level 8
+let consecutiveIncorrectCount = 0; // Track consecutive incorrect answers
+let hintButtonShown = false; // Track if hint button has been shown
 
 // Level configuration
 const levels = {
@@ -106,6 +108,7 @@ function checkAnswer() {
     // Check if input is empty
     if (!userAnswer) {
         showResult("Please enter an answer!", 'incorrect');
+        handleIncorrectAnswer();
         return;
     }
     
@@ -115,6 +118,7 @@ function checkAnswer() {
         document.getElementById('answerInput').value = levelStartInput;
         updateDigitCounter();
         showResult(`❌ Incorrect. Try again!`, 'incorrect');
+        handleIncorrectAnswer();
         return;
     }
     
@@ -125,6 +129,7 @@ function checkAnswer() {
     if (!hasPassedCurrentLevel(digitCount, currentLevel)) {
         const requiredDigits = getLevelDigitRequirement(currentLevel);
         showResult(`❌ Not enough digits for Level ${currentLevel}. You need ${requiredDigits} digits, but entered ${digitCount}.`, 'incorrect');
+        handleIncorrectAnswer();
         return;
     }
     
@@ -135,6 +140,7 @@ function checkAnswer() {
         // User entered enough digits to skip levels
         showResult(`🎉 INCREDIBLE! You entered ${digitCount} correct digits of Pi! Skipping to Level ${advanceLevel}!`, 'correct');
         celebrateCorrectAnswer();
+        handleCorrectAnswer();
         
         // Advance directly to the target level
         setTimeout(() => {
@@ -146,10 +152,12 @@ function checkAnswer() {
             // Special handling for congratulations and legendary levels - no interaction needed
             showResult(`🎉 You are already at the ultimate level! 🎉`, 'correct');
             celebrateCorrectAnswer();
+            handleCorrectAnswer();
             // No next level button for congratulations/legendary levels
         } else {
             showResult(`🎉 Perfect! You've entered ${digitCount} correct digits of Pi!`, 'correct');
             celebrateCorrectAnswer();
+            handleCorrectAnswer();
             
             // Show next level button if not on the last level
             if (currentLevel < Object.keys(levels).length) {
@@ -538,3 +546,35 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Function to handle incorrect answers and track consecutive count
+function handleIncorrectAnswer() {
+    consecutiveIncorrectCount++;
+    
+    // Show hint button after 10 consecutive incorrect answers
+    if (consecutiveIncorrectCount >= 10 && !hintButtonShown) {
+        showHintButton();
+    }
+}
+
+// Function to handle correct answers and reset consecutive count
+function handleCorrectAnswer() {
+    consecutiveIncorrectCount = 0; // Reset counter on correct answer
+}
+
+// Function to show the hint button
+function showHintButton() {
+    const hintBtn = document.getElementById('hintBtn');
+    hintButtonShown = true;
+    
+    // Add show class with animation
+    setTimeout(() => {
+        hintBtn.classList.add('show');
+    }, 300);
+}
+
+// Function to open the hint video
+function openHint() {
+    // Open the YouTube video in a new tab
+    window.open('https://www.youtube.com/watch?v=3HRkKznJoZA&list=RD3HRkKznJoZA&start_radio=1', '_blank');
+}

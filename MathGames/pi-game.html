@@ -286,6 +286,47 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
+        .hint-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .hint-btn.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hint-btn:hover {
+            background: linear-gradient(135deg, #5a6268, #343a40);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .hint-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
         .pi-symbol {
             font-size: 3rem;
             color: #667eea;
@@ -631,6 +672,11 @@
     </button>
     
     <div class="game-container">
+        <!-- Hint Button (appears after 10 consecutive incorrect answers) -->
+        <button id="hintBtn" class="hint-btn" onclick="openHint()" title="Need a hint? Watch this video!">
+            💡
+        </button>
+        
         <div class="pi-symbol">π</div>
         <h1>Pi Question Game</h1>
         <div id="levelIndicator" class="level-indicator">Level 1</div>

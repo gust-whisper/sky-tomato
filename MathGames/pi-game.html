@@ -169,6 +169,51 @@
             font-size: 1.5rem;
         }
 
+        .return-to-level7-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .return-to-level7-btn.show {
+            display: flex;
+        }
+
+        .return-to-level7-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .return-to-level7-btn:active {
+            transform: translateY(0);
+        }
+
+        .return-to-level7-btn::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            z-index: -1;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
         .level-indicator {
             font-size: 1rem;
             color: #667eea;
@@ -413,6 +458,12 @@
                 font-size: 20px;
             }
 
+            .return-to-level7-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+
             .level-buttons {
                 grid-template-columns: repeat(4, 1fr);
                 gap: 0.75rem;
@@ -455,6 +506,10 @@
         </div>
         
         <div class="button-container">
+            <button id="returnToLevel7Btn" class="return-to-level7-btn" onclick="returnToLevel7()" title="Return to Level 7">
+                7
+            </button>
+            
             <button class="submit-btn" onclick="checkAnswer()">
                 <span class="checkmark">✓</span>
                 Check Answer

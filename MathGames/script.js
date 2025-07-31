@@ -4,6 +4,7 @@
 let currentLevel = 1;
 let levelStartInput = ''; // Store the input value when level starts
 let isLevelTransitioning = false; // Prevent actions during level transitions
+let hasReachedLevel7 = false; // Track if user has ever reached level 7
 
 // Level configuration
 const levels = {
@@ -180,6 +181,12 @@ function advanceToLevel(targetLevel) {
     
     isLevelTransitioning = true;
     currentLevel = targetLevel;
+    
+    // Track if user has reached level 7
+    if (currentLevel >= 7) {
+        hasReachedLevel7 = true;
+    }
+    
     const levelConfig = levels[currentLevel];
     
     if (levelConfig) {
@@ -207,6 +214,9 @@ function advanceToLevel(targetLevel) {
             levelSelector.style.display = 'none';
         }
         
+        // Update return to level 7 button visibility
+        updateReturnToLevel7Button();
+        
         document.getElementById('result').classList.remove('show', 'correct', 'incorrect');
         document.getElementById('nextLevelBtn').style.display = 'none';
         document.getElementById('nextLevelBtn').classList.remove('show');
@@ -228,6 +238,27 @@ function advanceToLevel(targetLevel) {
         setTimeout(() => {
             isLevelTransitioning = false;
         }, 100);
+    }
+}
+
+// Function to return to level 7
+function returnToLevel7() {
+    if (isLevelTransitioning) return; // Prevent multiple calls during transition
+    
+    advanceToLevel(7);
+    showResult("🏆 Welcome back to Level 7! 🏆", 'correct');
+}
+
+// Function to update return to level 7 button visibility
+function updateReturnToLevel7Button() {
+    const returnBtn = document.getElementById('returnToLevel7Btn');
+    
+    if (hasReachedLevel7 && currentLevel !== 7) {
+        // Show the button if user has reached level 7 and is not currently on level 7
+        returnBtn.classList.add('show');
+    } else {
+        // Hide the button if user hasn't reached level 7 or is currently on level 7
+        returnBtn.classList.remove('show');
     }
 }
 
@@ -365,6 +396,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('answerInput').focus();
     updateDigitCounter(); // Initialize counter
     levelStartInput = document.getElementById('answerInput').value; // Initialize level start input
+    updateReturnToLevel7Button(); // Initialize return button visibility
 });
 
 // Add CSS animation for celebration

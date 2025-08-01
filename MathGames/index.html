@@ -208,6 +208,12 @@
                 <div class="game-description">Test your knowledge of Pi! Can you remember the first 3, 10, or even 25 digits of this mathematical constant?</div>
             </div>
             
+            <div class="game-card" onclick="openFastMath()">
+                <div class="game-icon">⚡</div>
+                <div class="game-title">FastMath</div>
+                <div class="game-description">Lightning-fast mental math! Solve 10 equations in the format x×y+z=? with only 10 seconds per round!</div>
+            </div>
+            
             <!-- Future games can be added here -->
             <div class="game-card coming-soon">
                 <div class="game-icon">🔢</div>
@@ -224,6 +230,10 @@
 
         function openPiGame() {
             window.location.href = 'pi-game.html';
+        }
+
+        function openFastMath() {
+            window.location.href = 'fastmath-game.html';
         }
     </script>
 </body>

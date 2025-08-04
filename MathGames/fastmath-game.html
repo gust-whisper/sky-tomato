@@ -141,6 +141,92 @@
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
         }
 
+        .level-selection {
+            text-align: center;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .level-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .level-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .level-card.locked:hover {
+            transform: none;
+            box-shadow: none;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: transparent;
+        }
+
+        .level-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .level-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+        }
+
+        .level-description {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .level-card.locked .level-name,
+        .level-card.locked .level-description {
+            color: #888;
+        }
+
+        .back-to-levels-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .back-to-levels-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
         .start-screen {
             text-align: center;
         }
@@ -265,10 +351,48 @@
     <button class="back-btn" onclick="goBack()" title="Back to Math Games">←</button>
     
     <div class="game-container">
-        <!-- Start Screen -->
-        <div id="startScreen" class="start-screen">
+        <!-- Level Selection Screen -->
+        <div id="levelSelectionScreen" class="level-selection">
             <div class="game-title">⚡ FastMath ⚡</div>
-            <div class="start-title">Ready for the Challenge?</div>
+            <div class="start-title">Choose Your Challenge</div>
+            <div class="start-description">
+                Select a level to begin your mathematical adventure!
+            </div>
+            
+            <div class="levels-grid">
+                <div class="level-card" onclick="selectLevel(1)">
+                    <div class="level-icon">⚡</div>
+                    <div class="level-name">Level 1: Classic FastMath</div>
+                    <div class="level-description">
+                        10 rounds of x × y + z = ? equations<br>
+                        10 seconds per question • Break after 5 rounds
+                    </div>
+                </div>
+                
+                <div class="level-card locked" onclick="selectLevel(2)">
+                    <div class="level-icon">🔒</div>
+                    <div class="level-name">Level 2: Coming Soon</div>
+                    <div class="level-description">
+                        More challenging math awaits!<br>
+                        This level will be unlocked soon.
+                    </div>
+                </div>
+                
+                <div class="level-card locked" onclick="selectLevel(3)">
+                    <div class="level-icon">🔒</div>
+                    <div class="level-name">Level 3: Coming Soon</div>
+                    <div class="level-description">
+                        The ultimate mathematical challenge!<br>
+                        This level will be unlocked soon.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="startScreen" class="start-screen hidden">
+            <div class="game-title">⚡ FastMath ⚡</div>
+            <div class="start-title">Level 1: Classic FastMath</div>
             <div class="start-description">
                 🎯 <strong>10 rounds</strong> of lightning-fast math!<br>
                 📐 Solve equations in the format: <strong>x × y + z = ?</strong><br>
@@ -277,6 +401,7 @@
                 💥 One wrong answer and you start over!
             </div>
             <button class="start-btn" onclick="startGame()">Start Game</button>
+            <button class="back-to-levels-btn" onclick="backToLevels()">← Back to Levels</button>
         </div>
 
         <!-- Game Screen -->
@@ -324,6 +449,7 @@
             <div id="gameOverTitle" class="game-over-title"></div>
             <div id="finalScore" class="final-score"></div>
             <button class="restart-btn" onclick="resetGame()">Play Again</button>
+            <button class="back-to-levels-btn" onclick="backToLevels()">← Back to Levels</button>
         </div>
     </div>
 
@@ -335,10 +461,49 @@
         let currentAnswer = 0;
         let gameTimer = null;
         let isGameActive = false;
+        let selectedLevel = 1; // Track which level is selected
 
         // Generate random number between min and max (inclusive)
         function randomNumber(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Level selection function
+        function selectLevel(level) {
+            selectedLevel = level;
+            
+            if (level === 1) {
+                // Level 1 is available
+                document.getElementById('levelSelectionScreen').classList.add('hidden');
+                document.getElementById('startScreen').classList.remove('hidden');
+            } else {
+                // Levels 2 and 3 are locked for now
+                alert('This level is coming soon! Stay tuned for more challenging math games.');
+            }
+        }
+
+        // Back to levels function
+        function backToLevels() {
+            // Hide all screens except level selection
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('restScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('levelSelectionScreen').classList.remove('hidden');
+            
+            // Reset game state
+            resetGameState();
+        }
+
+        // Reset game state without changing screens
+        function resetGameState() {
+            currentRound = 1;
+            score = 0;
+            timeLeft = 10;
+            isGameActive = false;
+            clearInterval(gameTimer);
+            document.getElementById('answerInput').value = '';
+            document.getElementById('timer').classList.remove('warning');
         }
 
         // Generate a new equation
@@ -515,16 +680,10 @@
 
         // Reset game
         function resetGame() {
-            currentRound = 1;
-            score = 0;
-            timeLeft = 10;
-            isGameActive = false;
-            clearInterval(gameTimer);
+            resetGameState();
             
             document.getElementById('gameOverScreen').classList.add('hidden');
             document.getElementById('startScreen').classList.remove('hidden');
-            document.getElementById('answerInput').value = '';
-            document.getElementById('timer').classList.remove('warning');
         }
 
         // Go back to Math Games hub

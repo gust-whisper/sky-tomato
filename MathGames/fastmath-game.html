@@ -365,7 +365,7 @@
                     <div class="level-name">Level 1: Classic FastMath</div>
                     <div class="level-description">
                         10 rounds of x × y + z = ? equations<br>
-                        10 seconds per question • Break after 5 rounds
+                        5 seconds per question • Break after 5 rounds
                     </div>
                 </div>
                 
@@ -396,7 +396,7 @@
             <div class="start-description">
                 🎯 <strong>10 rounds</strong> of lightning-fast math!<br>
                 📐 Solve equations in the format: <strong>x × y + z = ?</strong><br>
-                ⏱️ You have <strong>10 seconds</strong> per question<br>
+                ⏱️ You have <strong>5 seconds</strong> per question<br>
                 🏃 After 5 questions, enjoy a 10-second break<br>
                 💥 One wrong answer and you start over!
             </div>
@@ -419,7 +419,7 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Time</div>
-                    <div id="timer" class="info-value timer">10</div>
+                    <div id="timer" class="info-value timer">5</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Score</div>
@@ -457,7 +457,7 @@
         // Game state
         let currentRound = 1;
         let score = 0;
-        let timeLeft = 10;
+        let timeLeft = 5; // Changed to 5 seconds for Level 1
         let currentAnswer = 0;
         let gameTimer = null;
         let isGameActive = false;
@@ -499,7 +499,7 @@
         function resetGameState() {
             currentRound = 1;
             score = 0;
-            timeLeft = 10;
+            timeLeft = 5; // Reset to 5 seconds for Level 1
             isGameActive = false;
             clearInterval(gameTimer);
             document.getElementById('answerInput').value = '';
@@ -536,7 +536,7 @@
 
         // Start the timer for current round
         function startTimer() {
-            timeLeft = 10;
+            timeLeft = 5; // 5 seconds per question for Level 1
             updateTimer();
             
             gameTimer = setInterval(() => {

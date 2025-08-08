@@ -80,6 +80,13 @@
             padding: 1rem;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .game-info .info-item {
+            flex: 1;
+            min-width: 80px;
         }
 
         .info-item {
@@ -369,12 +376,12 @@
                     </div>
                 </div>
                 
-                <div class="level-card locked" onclick="selectLevel(2)">
-                    <div class="level-icon">🔒</div>
-                    <div class="level-name">Level 2: Coming Soon</div>
+                <div class="level-card" id="level2Card" onclick="selectLevel(2)">
+                    <div class="level-icon">⏱️</div>
+                    <div class="level-name">Level 2: Time Attack</div>
                     <div class="level-description">
-                        More challenging math awaits!<br>
-                        This level will be unlocked soon.
+                        Endless questions for 1-2 minutes<br>
+                        Score based on accuracy • No game over
                     </div>
                 </div>
                 
@@ -401,6 +408,35 @@
                 💥 One wrong answer and you start over!
             </div>
             <button class="start-btn" onclick="startGame()">Start Game</button>
+            <button class="back-to-levels-btn" onclick="backToLevels()">← Back to Levels</button>
+        </div>
+
+        <!-- Level 2 Time Selection Screen -->
+        <div id="timeSelectionScreen" class="start-screen hidden">
+            <div class="game-title">⚡ FastMath ⚡</div>
+            <div class="start-title">Level 2: Time Attack</div>
+            <div class="start-description">
+                ⏱️ Choose your time limit for endless math challenges!<br>
+                📊 Score based on <strong>accuracy percentage</strong><br>
+                ⚡ <strong>5 seconds per question</strong> - answer quickly!<br>
+                ❌ Wrong answers or timeouts won't end the game<br>
+                🔄 Keep solving until time runs out!
+            </div>
+            
+            <div class="levels-grid">
+                <div class="level-card" onclick="startTimeAttack(60)">
+                    <div class="level-icon">⚡</div>
+                    <div class="level-name">1 Minute Challenge</div>
+                    <div class="level-description">Fast-paced mathematical sprint</div>
+                </div>
+                
+                <div class="level-card" onclick="startTimeAttack(120)">
+                    <div class="level-icon">⏰</div>
+                    <div class="level-name">2 Minute Challenge</div>
+                    <div class="level-description">Extended endurance test</div>
+                </div>
+            </div>
+            
             <button class="back-to-levels-btn" onclick="backToLevels()">← Back to Levels</button>
         </div>
 
@@ -434,6 +470,36 @@
             </div>
         </div>
 
+        <!-- Level 2 Game Screen -->
+        <div id="timeAttackScreen" class="hidden">
+            <div class="game-title">⚡ Time Attack ⚡</div>
+            
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Questions</div>
+                    <div id="questionCount" class="info-value">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Question Timer</div>
+                    <div id="questionTimer" class="info-value timer">5</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Time Left</div>
+                    <div id="timeAttackTimer" class="info-value timer">60</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Accuracy</div>
+                    <div id="accuracy" class="info-value">100%</div>
+                </div>
+            </div>
+
+            <div id="timeAttackEquation" class="equation"></div>
+            
+            <div class="input-container">
+                <input type="text" id="timeAttackInput" class="answer-input" placeholder="?" autocomplete="off" inputmode="numeric">
+            </div>
+        </div>
+
         <!-- Rest Screen -->
         <div id="restScreen" class="hidden rest-screen">
             <div class="rest-title">🎉 Halfway There! 🎉</div>
@@ -462,6 +528,15 @@
         let gameTimer = null;
         let isGameActive = false;
         let selectedLevel = 1; // Track which level is selected
+        let hasCompletedLevel1 = localStorage.getItem('fastmath-level1-completed') === 'true'; // Track level completion
+        
+        // Level 2 specific variables
+        let totalQuestions = 0;
+        let correctAnswers = 0;
+        let gameStartTime = 0;
+        let gameDuration = 60; // Default 1 minute
+        let questionTimer = null; // Timer for individual questions in Level 2
+        let questionTimeLeft = 5; // 5 seconds per question
 
         // Generate random number between min and max (inclusive)
         function randomNumber(min, max) {
@@ -476,8 +551,16 @@
                 // Level 1 is available
                 document.getElementById('levelSelectionScreen').classList.add('hidden');
                 document.getElementById('startScreen').classList.remove('hidden');
+            } else if (level === 2) {
+                // Check if Level 2 is unlocked
+                if (hasCompletedLevel1) {
+                    document.getElementById('levelSelectionScreen').classList.add('hidden');
+                    document.getElementById('timeSelectionScreen').classList.remove('hidden');
+                } else {
+                    alert('Complete Level 1 first to unlock Time Attack mode!');
+                }
             } else {
-                // Levels 2 and 3 are locked for now
+                // Level 3 is locked for now
                 alert('This level is coming soon! Stay tuned for more challenging math games.');
             }
         }
@@ -486,13 +569,28 @@
         function backToLevels() {
             // Hide all screens except level selection
             document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('timeSelectionScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('timeAttackScreen').classList.add('hidden');
             document.getElementById('restScreen').classList.add('hidden');
             document.getElementById('gameOverScreen').classList.add('hidden');
             document.getElementById('levelSelectionScreen').classList.remove('hidden');
             
             // Reset game state
             resetGameState();
+            
+            // Update level 2 unlock status
+            updateLevelUnlockStatus();
+        }
+
+        // Update level unlock status
+        function updateLevelUnlockStatus() {
+            const level2Card = document.getElementById('level2Card');
+            if (hasCompletedLevel1) {
+                level2Card.classList.remove('locked');
+            } else {
+                level2Card.classList.add('locked');
+            }
         }
 
         // Reset game state without changing screens
@@ -502,8 +600,14 @@
             timeLeft = 5; // Reset to 5 seconds for Level 1
             isGameActive = false;
             clearInterval(gameTimer);
+            clearInterval(questionTimer); // Clear question timer too
             document.getElementById('answerInput').value = '';
             document.getElementById('timer').classList.remove('warning');
+            
+            // Reset Level 2 specific variables
+            totalQuestions = 0;
+            correctAnswers = 0;
+            questionTimeLeft = 5;
         }
 
         // Generate a new equation
@@ -515,6 +619,191 @@
             currentAnswer = x * y + z;
             
             document.getElementById('equation').textContent = `${x} × ${y} + ${z} = ?`;
+        }
+
+        // Generate equation for Time Attack mode
+        function generateTimeAttackEquation() {
+            const x = randomNumber(1, 12);
+            const y = randomNumber(1, 12);
+            const z = randomNumber(1, 10);
+            
+            currentAnswer = x * y + z;
+            
+            document.getElementById('timeAttackEquation').textContent = `${x} × ${y} + ${z} = ?`;
+        }
+
+        // Start Time Attack mode
+        function startTimeAttack(duration) {
+            gameDuration = duration;
+            totalQuestions = 0;
+            correctAnswers = 0;
+            isGameActive = true;
+            gameStartTime = Date.now();
+            
+            document.getElementById('timeSelectionScreen').classList.add('hidden');
+            document.getElementById('timeAttackScreen').classList.remove('hidden');
+            
+            // Update display
+            document.getElementById('timeAttackTimer').textContent = duration;
+            document.getElementById('questionCount').textContent = '0';
+            document.getElementById('accuracy').textContent = '100%';
+            document.getElementById('questionTimer').textContent = '5';
+            
+            generateTimeAttackEquation();
+            startTimeAttackTimer();
+            startQuestionTimer();
+            
+            // Focus on input
+            document.getElementById('timeAttackInput').focus();
+        }
+
+        // Start the timer for Time Attack mode
+        function startTimeAttackTimer() {
+            timeLeft = gameDuration;
+            
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timeAttackTimer').textContent = timeLeft;
+                
+                // Add warning animation when time is low
+                const timerElement = document.getElementById('timeAttackTimer');
+                if (timeLeft <= 10) {
+                    timerElement.classList.add('warning');
+                } else {
+                    timerElement.classList.remove('warning');
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    clearInterval(questionTimer);
+                    endTimeAttack();
+                }
+            }, 1000);
+        }
+
+        // Start the question timer (5 seconds per question)
+        function startQuestionTimer() {
+            questionTimeLeft = 5;
+            document.getElementById('questionTimer').textContent = questionTimeLeft;
+            
+            questionTimer = setInterval(() => {
+                questionTimeLeft--;
+                document.getElementById('questionTimer').textContent = questionTimeLeft;
+                
+                // Add warning animation when question time is low
+                const questionTimerElement = document.getElementById('questionTimer');
+                if (questionTimeLeft <= 2) {
+                    questionTimerElement.classList.add('warning');
+                } else {
+                    questionTimerElement.classList.remove('warning');
+                }
+                
+                if (questionTimeLeft <= 0) {
+                    clearInterval(questionTimer);
+                    // Time's up for this question - count as incorrect
+                    handleTimeoutQuestion();
+                }
+            }, 1000);
+        }
+
+        // Handle when question time runs out
+        function handleTimeoutQuestion() {
+            if (!isGameActive) return;
+            
+            totalQuestions++;
+            // Don't increment correctAnswers (counts as incorrect)
+            
+            // Shake animation for timeout
+            document.querySelector('.game-container').classList.add('shake');
+            setTimeout(() => {
+                document.querySelector('.game-container').classList.remove('shake');
+            }, 300);
+            
+            // Update display and move to next question
+            updateTimeAttackDisplay();
+            nextTimeAttackQuestion();
+        }
+
+        // Move to next question in Time Attack
+        function nextTimeAttackQuestion() {
+            if (!isGameActive) return;
+            
+            // Clear input and generate new question
+            document.getElementById('timeAttackInput').value = '';
+            generateTimeAttackEquation();
+            startQuestionTimer(); // Start timer for new question
+            document.getElementById('timeAttackInput').focus();
+        }
+
+        // Update Time Attack display
+        function updateTimeAttackDisplay() {
+            document.getElementById('questionCount').textContent = totalQuestions;
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        // Check Time Attack answer
+        function checkTimeAttackAnswer() {
+            if (!isGameActive) return;
+            
+            const inputValue = document.getElementById('timeAttackInput').value.trim();
+            const userAnswer = parseInt(inputValue);
+            
+            // Check if input is empty or not a valid number
+            if (!inputValue || isNaN(userAnswer)) {
+                return;
+            }
+            
+            // Stop the question timer since user answered
+            clearInterval(questionTimer);
+            
+            totalQuestions++;
+            
+            if (userAnswer === currentAnswer) {
+                correctAnswers++;
+                // Brief celebrate animation
+                document.querySelector('.game-container').classList.add('celebrate');
+                setTimeout(() => {
+                    document.querySelector('.game-container').classList.remove('celebrate');
+                }, 300);
+            } else {
+                // Brief shake animation
+                document.querySelector('.game-container').classList.add('shake');
+                setTimeout(() => {
+                    document.querySelector('.game-container').classList.remove('shake');
+                }, 300);
+            }
+            
+            // Update display and move to next question
+            updateTimeAttackDisplay();
+            nextTimeAttackQuestion();
+        }
+
+        // End Time Attack mode
+        function endTimeAttack() {
+            isGameActive = false;
+            clearInterval(gameTimer);
+            clearInterval(questionTimer);
+            
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+            
+            document.getElementById('timeAttackScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+            
+            const titleElement = document.getElementById('gameOverTitle');
+            const scoreElement = document.getElementById('finalScore');
+            
+            titleElement.textContent = '⏱️ TIME\'S UP! ⏱️';
+            titleElement.className = 'game-over-title victory';
+            
+            let performanceMessage = '';
+            if (accuracy >= 90) performanceMessage = 'Outstanding accuracy!';
+            else if (accuracy >= 80) performanceMessage = 'Great job!';
+            else if (accuracy >= 70) performanceMessage = 'Good work!';
+            else if (accuracy >= 60) performanceMessage = 'Keep practicing!';
+            else performanceMessage = 'Room for improvement!';
+            
+            scoreElement.textContent = `${performanceMessage}\n\nQuestions Answered: ${totalQuestions}\nCorrect Answers: ${correctAnswers}\nAccuracy: ${accuracy}%\n\nDuration: ${gameDuration === 60 ? '1' : '2'} minute${gameDuration === 60 ? '' : 's'}`;
         }
 
         // Start the game
@@ -660,6 +949,12 @@
             isGameActive = false;
             clearInterval(gameTimer);
             
+            // Save Level 1 completion
+            if (victory && selectedLevel === 1) {
+                hasCompletedLevel1 = true;
+                localStorage.setItem('fastmath-level1-completed', 'true');
+            }
+            
             document.getElementById('gameScreen').classList.add('hidden');
             document.getElementById('restScreen').classList.add('hidden');
             document.getElementById('gameOverScreen').classList.remove('hidden');
@@ -670,7 +965,9 @@
             if (victory) {
                 titleElement.textContent = '🏆 VICTORY! 🏆';
                 titleElement.className = 'game-over-title victory';
-                scoreElement.textContent = `Congratulations! You completed all 10 rounds!\nFinal Score: ${score} points`;
+                let completionMessage = selectedLevel === 1 && !localStorage.getItem('fastmath-level1-completed') ? 
+                    '\n🎉 Level 2 unlocked!' : '';
+                scoreElement.textContent = `Congratulations! You completed all 10 rounds!\nFinal Score: ${score} points${completionMessage}`;
             } else {
                 titleElement.textContent = '💥 Game Over 💥';
                 titleElement.className = 'game-over-title defeat';
@@ -683,7 +980,12 @@
             resetGameState();
             
             document.getElementById('gameOverScreen').classList.add('hidden');
-            document.getElementById('startScreen').classList.remove('hidden');
+            
+            if (selectedLevel === 1) {
+                document.getElementById('startScreen').classList.remove('hidden');
+            } else if (selectedLevel === 2) {
+                document.getElementById('timeSelectionScreen').classList.remove('hidden');
+            }
         }
 
         // Go back to Math Games hub
@@ -705,6 +1007,26 @@
                 event.preventDefault();
                 checkAnswer();
             }
+        });
+
+        // Time Attack input event listeners
+        document.getElementById('timeAttackInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                checkTimeAttackAnswer();
+            }
+        });
+
+        document.getElementById('timeAttackInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                checkTimeAttackAnswer();
+            }
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateLevelUnlockStatus();
         });
     </script>
 </body>

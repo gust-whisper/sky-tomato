@@ -1028,6 +1028,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             updateLevelUnlockStatus();
         });
+
+        // Reset level unlocks when user leaves the page
+        window.addEventListener('beforeunload', function() {
+            localStorage.removeItem('fastmath-level1-completed');
+        });
     </script>
 </body>
 </html>

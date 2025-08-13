@@ -352,6 +352,75 @@
         .shake {
             animation: shake 0.5s ease-in-out;
         }
+
+        .game-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .practice-btn {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 215, 0, 0.3);
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .practice-btn:hover {
+            background: rgba(255, 215, 0, 0.5);
+            transform: translateY(-50%) translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 215, 0, 0.3);
+        }
+
+        .practice-btn.show {
+            display: flex;
+        }
+
+        .practice-answer-display {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 107, 107, 0.2);
+            border-radius: 10px;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .next-practice-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .next-practice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -360,7 +429,10 @@
     <div class="game-container">
         <!-- Level Selection Screen -->
         <div id="levelSelectionScreen" class="level-selection">
-            <div class="game-title">⚡ FastMath ⚡</div>
+            <div class="game-header">
+                <div class="game-title">⚡ FastMath ⚡</div>
+                <button class="practice-btn" id="practiceBtn" onclick="startPracticeMode()" title="Practice Mode">∞</button>
+            </div>
             <div class="start-title">Choose Your Challenge</div>
             <div class="start-description">
                 Select a level to begin your mathematical adventure!
@@ -398,7 +470,10 @@
 
         <!-- Start Screen -->
         <div id="startScreen" class="start-screen hidden">
-            <div class="game-title">⚡ FastMath ⚡</div>
+            <div class="game-header">
+                <div class="game-title">⚡ FastMath ⚡</div>
+                <button class="practice-btn" id="practiceBtn2" onclick="startPracticeMode()" title="Practice Mode">∞</button>
+            </div>
             <div class="start-title">Level 1: Classic FastMath</div>
             <div class="start-description">
                 🎯 <strong>10 rounds</strong> of lightning-fast math!<br>
@@ -413,7 +488,10 @@
 
         <!-- Level 2 Time Selection Screen -->
         <div id="timeSelectionScreen" class="start-screen hidden">
-            <div class="game-title">⚡ FastMath ⚡</div>
+            <div class="game-header">
+                <div class="game-title">⚡ FastMath ⚡</div>
+                <button class="practice-btn" id="practiceBtn3" onclick="startPracticeMode()" title="Practice Mode">∞</button>
+            </div>
             <div class="start-title">Level 2: Time Attack</div>
             <div class="start-description">
                 ⏱️ Choose your time limit for endless math challenges!<br>
@@ -442,7 +520,10 @@
 
         <!-- Game Screen -->
         <div id="gameScreen" class="hidden">
-            <div class="game-title">⚡ FastMath ⚡</div>
+            <div class="game-header">
+                <div class="game-title">⚡ FastMath ⚡</div>
+                <button class="practice-btn" id="practiceBtn4" onclick="startPracticeMode()" title="Practice Mode">∞</button>
+            </div>
             
             <div class="progress-bar">
                 <div id="progressFill" class="progress-fill" style="width: 0%"></div>
@@ -472,7 +553,10 @@
 
         <!-- Level 2 Game Screen -->
         <div id="timeAttackScreen" class="hidden">
-            <div class="game-title">⚡ Time Attack ⚡</div>
+            <div class="game-header">
+                <div class="game-title">⚡ Time Attack ⚡</div>
+                <button class="practice-btn" id="practiceBtn5" onclick="startPracticeMode()" title="Practice Mode">∞</button>
+            </div>
             
             <div class="game-info">
                 <div class="info-item">
@@ -512,10 +596,44 @@
 
         <!-- Game Over Screen -->
         <div id="gameOverScreen" class="hidden game-over">
-            <div id="gameOverTitle" class="game-over-title"></div>
+            <div class="game-header">
+                <div id="gameOverTitle" class="game-over-title"></div>
+                <button class="practice-btn" id="practiceBtn6" onclick="startPracticeMode()" title="Practice Mode">∞</button>
+            </div>
             <div id="finalScore" class="final-score"></div>
             <button class="restart-btn" onclick="resetGame()">Play Again</button>
             <button class="back-to-levels-btn" onclick="backToLevels()">← Back to Levels</button>
+        </div>
+
+        <!-- Practice Mode Screen -->
+        <div id="practiceScreen" class="hidden">
+            <div class="game-title">∞ Practice Mode ∞</div>
+            
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Question</div>
+                    <div id="practiceQuestionNumber" class="info-value">1</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Correct</div>
+                    <div id="practiceCorrect" class="info-value">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Accuracy</div>
+                    <div id="practiceAccuracy" class="info-value">0%</div>
+                </div>
+            </div>
+
+            <div id="practiceEquation" class="equation"></div>
+            
+            <div class="input-container">
+                <input type="text" id="practiceInput" class="answer-input" placeholder="?" autocomplete="off" inputmode="numeric">
+            </div>
+            
+            <div id="practiceAnswerDisplay" class="practice-answer-display hidden"></div>
+            <button id="nextPracticeBtn" class="next-practice-btn hidden" onclick="nextPracticeQuestion()">Next Question</button>
+            
+            <button class="back-to-levels-btn" onclick="exitPracticeMode()">← Back to Levels</button>
         </div>
     </div>
 
@@ -537,6 +655,11 @@
         let gameDuration = 60; // Default 1 minute
         let questionTimer = null; // Timer for individual questions in Level 2
         let questionTimeLeft = 5; // 5 seconds per question
+        
+        // Practice mode variables
+        let consecutiveFailures = parseInt(localStorage.getItem('fastmath-consecutive-failures') || '0');
+        let isPracticeMode = false;
+        let practiceQuestionCount = 0;
 
         // Generate random number between min and max (inclusive)
         function randomNumber(min, max) {
@@ -574,13 +697,40 @@
             document.getElementById('timeAttackScreen').classList.add('hidden');
             document.getElementById('restScreen').classList.add('hidden');
             document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('practiceScreen').classList.add('hidden');
             document.getElementById('levelSelectionScreen').classList.remove('hidden');
             
             // Reset game state
             resetGameState();
             
-            // Update level 2 unlock status
+            // Update level 2 unlock status and practice button
             updateLevelUnlockStatus();
+            updatePracticeButtonVisibility();
+        }
+
+        // Update practice button visibility
+        function updatePracticeButtonVisibility() {
+            const practiceButtons = [
+                document.getElementById('practiceBtn'),
+                document.getElementById('practiceBtn2'),
+                document.getElementById('practiceBtn3'),
+                document.getElementById('practiceBtn4'),
+                document.getElementById('practiceBtn5'),
+                document.getElementById('practiceBtn6')
+            ];
+            
+            // Only show practice button if user has failed Level 1 at least 5 times
+            const shouldShowPracticeMode = consecutiveFailures >= 5;
+            
+            practiceButtons.forEach(btn => {
+                if (btn) {
+                    if (shouldShowPracticeMode) {
+                        btn.classList.add('show');
+                    } else {
+                        btn.classList.remove('show');
+                    }
+                }
+            });
         }
 
         // Update level unlock status
@@ -599,6 +749,7 @@
             score = 0;
             timeLeft = 5; // Reset to 5 seconds for Level 1
             isGameActive = false;
+            isPracticeMode = false;
             clearInterval(gameTimer);
             clearInterval(questionTimer); // Clear question timer too
             document.getElementById('answerInput').value = '';
@@ -608,6 +759,9 @@
             totalQuestions = 0;
             correctAnswers = 0;
             questionTimeLeft = 5;
+            
+            // Reset practice mode variables
+            practiceQuestionCount = 0;
         }
 
         // Generate a new equation
@@ -630,6 +784,17 @@
             currentAnswer = x * y + z;
             
             document.getElementById('timeAttackEquation').textContent = `${x} × ${y} + ${z} = ?`;
+        }
+
+        // Generate equation for Practice mode
+        function generatePracticeEquation() {
+            const x = randomNumber(1, 12);
+            const y = randomNumber(1, 12);
+            const z = randomNumber(1, 10);
+            
+            currentAnswer = x * y + z;
+            
+            document.getElementById('practiceEquation').textContent = `${x} × ${y} + ${z} = ?`;
         }
 
         // Start Time Attack mode
@@ -949,6 +1114,18 @@
             isGameActive = false;
             clearInterval(gameTimer);
             
+            // Track consecutive failures for Level 1
+            if (!victory && selectedLevel === 1) {
+                consecutiveFailures++;
+                localStorage.setItem('fastmath-consecutive-failures', consecutiveFailures.toString());
+                updatePracticeButtonVisibility();
+            } else if (victory && selectedLevel === 1) {
+                // Reset consecutive failures on victory
+                consecutiveFailures = 0;
+                localStorage.setItem('fastmath-consecutive-failures', '0');
+                updatePracticeButtonVisibility();
+            }
+            
             // Save Level 1 completion
             if (victory && selectedLevel === 1) {
                 hasCompletedLevel1 = true;
@@ -971,7 +1148,9 @@
             } else {
                 titleElement.textContent = '💥 Game Over 💥';
                 titleElement.className = 'game-over-title defeat';
-                scoreElement.textContent = `You made it to round ${currentRound}\nFinal Score: ${score} points\n\nBetter luck next time!`;
+                let practiceHint = consecutiveFailures >= 5 && selectedLevel === 1 ? 
+                    '\n💡 Practice Mode is now available! (∞ button)' : '';
+                scoreElement.textContent = `You made it to round ${currentRound}\nFinal Score: ${score} points\n\nBetter luck next time!${practiceHint}`;
             }
         }
 
@@ -991,6 +1170,103 @@
         // Go back to Math Games hub
         function goBack() {
             window.location.href = 'index.html';
+        }
+
+        // Practice Mode Functions
+        function startPracticeMode() {
+            isPracticeMode = true;
+            practiceQuestionCount = 0;
+            correctAnswers = 0; // Reuse for practice mode
+            
+            // Hide all other screens
+            document.getElementById('levelSelectionScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('timeSelectionScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('timeAttackScreen').classList.add('hidden');
+            document.getElementById('restScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            
+            // Show practice screen
+            document.getElementById('practiceScreen').classList.remove('hidden');
+            
+            // Initialize practice mode
+            updatePracticeDisplay();
+            generatePracticeEquation();
+            document.getElementById('practiceInput').focus();
+            
+            // Hide answer display and next button initially
+            document.getElementById('practiceAnswerDisplay').classList.add('hidden');
+            document.getElementById('nextPracticeBtn').classList.add('hidden');
+        }
+
+        function checkPracticeAnswer() {
+            if (!isPracticeMode) return;
+            
+            const inputValue = document.getElementById('practiceInput').value.trim();
+            const userAnswer = parseInt(inputValue);
+            
+            // Check if input is empty or not a valid number
+            if (!inputValue || isNaN(userAnswer)) {
+                // Shake animation for invalid input
+                document.querySelector('.game-container').classList.add('shake');
+                setTimeout(() => {
+                    document.querySelector('.game-container').classList.remove('shake');
+                }, 500);
+                return;
+            }
+            
+            practiceQuestionCount++;
+            
+            if (userAnswer === currentAnswer) {
+                correctAnswers++;
+                // Celebrate correct answer
+                document.querySelector('.game-container').classList.add('celebrate');
+                setTimeout(() => {
+                    document.querySelector('.game-container').classList.remove('celebrate');
+                }, 600);
+                
+                // Move to next question immediately
+                updatePracticeDisplay();
+                nextPracticeQuestion();
+            } else {
+                // Show the correct answer
+                document.getElementById('practiceAnswerDisplay').textContent = `The correct answer is: ${currentAnswer}`;
+                document.getElementById('practiceAnswerDisplay').classList.remove('hidden');
+                document.getElementById('nextPracticeBtn').classList.remove('hidden');
+                
+                // Disable input
+                document.getElementById('practiceInput').disabled = true;
+                
+                // Update display
+                updatePracticeDisplay();
+            }
+        }
+
+        function nextPracticeQuestion() {
+            // Clear input and enable it
+            document.getElementById('practiceInput').value = '';
+            document.getElementById('practiceInput').disabled = false;
+            
+            // Hide answer display and next button
+            document.getElementById('practiceAnswerDisplay').classList.add('hidden');
+            document.getElementById('nextPracticeBtn').classList.add('hidden');
+            
+            // Generate new question and focus
+            generatePracticeEquation();
+            document.getElementById('practiceInput').focus();
+        }
+
+        function updatePracticeDisplay() {
+            document.getElementById('practiceQuestionNumber').textContent = practiceQuestionCount + 1;
+            document.getElementById('practiceCorrect').textContent = correctAnswers;
+            const accuracy = practiceQuestionCount > 0 ? Math.round((correctAnswers / practiceQuestionCount) * 100) : 0;
+            document.getElementById('practiceAccuracy').textContent = accuracy + '%';
+        }
+
+        function exitPracticeMode() {
+            isPracticeMode = false;
+            backToLevels();
         }
 
         // Event listeners
@@ -1024,14 +1300,31 @@
             }
         });
 
+        // Practice mode input event listeners
+        document.getElementById('practiceInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                checkPracticeAnswer();
+            }
+        });
+
+        document.getElementById('practiceInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                checkPracticeAnswer();
+            }
+        });
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             updateLevelUnlockStatus();
+            updatePracticeButtonVisibility();
         });
 
         // Reset level unlocks when user leaves the page
         window.addEventListener('beforeunload', function() {
             localStorage.removeItem('fastmath-level1-completed');
+            localStorage.removeItem('fastmath-consecutive-failures');
         });
     </script>
 </body>

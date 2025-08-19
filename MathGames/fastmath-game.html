@@ -363,16 +363,16 @@
 
         .practice-btn {
             position: absolute;
-            top: 50%;
-            right: 0;
+            top: calc(50% - 10px);
+            right: -10px;
             transform: translateY(-50%);
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             border: none;
             border-radius: 50%;
             background: rgba(255, 215, 0, 0.3);
             color: white;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
             cursor: pointer;
             display: none;
@@ -727,16 +727,10 @@
                 document.getElementById('practiceBtn6')
             ];
             
-            // Only show practice button if user has failed Level 1 at least 5 times
-            const shouldShowPracticeMode = consecutiveFailures >= 5;
-            
+            // Always show practice button
             practiceButtons.forEach(btn => {
                 if (btn) {
-                    if (shouldShowPracticeMode) {
-                        btn.classList.add('show');
-                    } else {
-                        btn.classList.remove('show');
-                    }
+                    btn.classList.add('show');
                 }
             });
         }
@@ -1160,9 +1154,7 @@
             } else {
                 titleElement.textContent = '💥 Game Over 💥';
                 titleElement.className = 'game-over-title defeat';
-                let practiceHint = consecutiveFailures >= 5 && selectedLevel === 1 ? 
-                    '\n💡 Practice Mode is now available! (∞ button)' : '';
-                scoreElement.textContent = `You made it to round ${currentRound}\nFinal Score: ${score} points\n\nBetter luck next time!${practiceHint}`;
+                scoreElement.textContent = `You made it to round ${currentRound}\nFinal Score: ${score} points\n\nBetter luck next time!`;
             }
         }
 

@@ -615,8 +615,12 @@
                     <div id="practiceQuestionNumber" class="info-value">1</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Correct</div>
-                    <div id="practiceCorrect" class="info-value">0</div>
+                    <div class="info-label">Current Time</div>
+                    <div id="practiceCurrentTimer" class="info-value">0.0s</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Avg Time</div>
+                    <div id="practiceAverageTime" class="info-value">0.0s</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Accuracy</div>
@@ -660,6 +664,10 @@
         let consecutiveFailures = parseInt(localStorage.getItem('fastmath-consecutive-failures') || '0');
         let isPracticeMode = false;
         let practiceQuestionCount = 0;
+        let practiceQuestionStartTime = 0;
+        let practiceTotalTime = 0;
+        let practiceCurrentTime = 0;
+        let practiceTimeInterval = null;
 
         // Generate random number between min and max (inclusive)
         function randomNumber(min, max) {
@@ -752,6 +760,7 @@
             isPracticeMode = false;
             clearInterval(gameTimer);
             clearInterval(questionTimer); // Clear question timer too
+            clearInterval(practiceTimeInterval); // Clear practice timer
             document.getElementById('answerInput').value = '';
             document.getElementById('timer').classList.remove('warning');
             
@@ -762,12 +771,15 @@
             
             // Reset practice mode variables
             practiceQuestionCount = 0;
+            practiceQuestionStartTime = 0;
+            practiceTotalTime = 0;
+            practiceCurrentTime = 0;
         }
 
         // Generate a new equation
         function generateEquation() {
-            const x = randomNumber(1, 12);
-            const y = randomNumber(1, 12);
+            const x = randomNumber(1, 10);
+            const y = randomNumber(1, 10);
             const z = randomNumber(1, 10); // Changed to 1-10 range for z
             
             currentAnswer = x * y + z;
@@ -777,8 +789,8 @@
 
         // Generate equation for Time Attack mode
         function generateTimeAttackEquation() {
-            const x = randomNumber(1, 12);
-            const y = randomNumber(1, 12);
+            const x = randomNumber(1, 10);
+            const y = randomNumber(1, 10);
             const z = randomNumber(1, 10);
             
             currentAnswer = x * y + z;
@@ -788,8 +800,8 @@
 
         // Generate equation for Practice mode
         function generatePracticeEquation() {
-            const x = randomNumber(1, 12);
-            const y = randomNumber(1, 12);
+            const x = randomNumber(1, 10);
+            const y = randomNumber(1, 10);
             const z = randomNumber(1, 10);
             
             currentAnswer = x * y + z;
@@ -1177,6 +1189,8 @@
             isPracticeMode = true;
             practiceQuestionCount = 0;
             correctAnswers = 0; // Reuse for practice mode
+            practiceTotalTime = 0;
+            practiceCurrentTime = 0;
             
             // Hide all other screens
             document.getElementById('levelSelectionScreen').classList.add('hidden');
@@ -1193,11 +1207,30 @@
             // Initialize practice mode
             updatePracticeDisplay();
             generatePracticeEquation();
+            startPracticeTimer();
             document.getElementById('practiceInput').focus();
             
             // Hide answer display and next button initially
             document.getElementById('practiceAnswerDisplay').classList.add('hidden');
             document.getElementById('nextPracticeBtn').classList.add('hidden');
+        }
+
+        function startPracticeTimer() {
+            practiceQuestionStartTime = Date.now();
+            practiceCurrentTime = 0;
+            
+            // Update current timer display every 100ms for smoother updates
+            practiceTimeInterval = setInterval(() => {
+                practiceCurrentTime = (Date.now() - practiceQuestionStartTime) / 1000;
+                document.getElementById('practiceCurrentTimer').textContent = practiceCurrentTime.toFixed(1) + 's';
+            }, 100);
+        }
+
+        function stopPracticeTimer() {
+            clearInterval(practiceTimeInterval);
+            const questionTime = (Date.now() - practiceQuestionStartTime) / 1000;
+            practiceTotalTime += questionTime;
+            return questionTime;
         }
 
         function checkPracticeAnswer() {
@@ -1216,6 +1249,8 @@
                 return;
             }
             
+            // Stop the timer and record the time
+            const questionTime = stopPracticeTimer();
             practiceQuestionCount++;
             
             if (userAnswer === currentAnswer) {
@@ -1230,8 +1265,9 @@
                 updatePracticeDisplay();
                 nextPracticeQuestion();
             } else {
-                // Show the correct answer
-                document.getElementById('practiceAnswerDisplay').textContent = `The correct answer is: ${currentAnswer}`;
+                // Show the correct answer with time taken
+                document.getElementById('practiceAnswerDisplay').textContent = 
+                    `The correct answer is: ${currentAnswer} (took ${questionTime.toFixed(1)}s)`;
                 document.getElementById('practiceAnswerDisplay').classList.remove('hidden');
                 document.getElementById('nextPracticeBtn').classList.remove('hidden');
                 
@@ -1252,20 +1288,27 @@
             document.getElementById('practiceAnswerDisplay').classList.add('hidden');
             document.getElementById('nextPracticeBtn').classList.add('hidden');
             
-            // Generate new question and focus
+            // Generate new question, start timer and focus
             generatePracticeEquation();
+            startPracticeTimer();
             document.getElementById('practiceInput').focus();
         }
 
         function updatePracticeDisplay() {
             document.getElementById('practiceQuestionNumber').textContent = practiceQuestionCount + 1;
-            document.getElementById('practiceCorrect').textContent = correctAnswers;
+            
+            // Calculate and display average time
+            const averageTime = practiceQuestionCount > 0 ? (practiceTotalTime / practiceQuestionCount) : 0;
+            document.getElementById('practiceAverageTime').textContent = averageTime.toFixed(1) + 's';
+            
+            // Calculate and display accuracy
             const accuracy = practiceQuestionCount > 0 ? Math.round((correctAnswers / practiceQuestionCount) * 100) : 0;
             document.getElementById('practiceAccuracy').textContent = accuracy + '%';
         }
 
         function exitPracticeMode() {
             isPracticeMode = false;
+            clearInterval(practiceTimeInterval); // Clear the practice timer
             backToLevels();
         }
 

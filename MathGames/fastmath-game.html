@@ -422,39 +422,6 @@
             box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
         }
 
-        .cheat-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border: none;
-            border-radius: 50%;
-            background: rgba(255, 0, 0, 0.7);
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 16px rgba(255, 0, 0, 0.3);
-            border: 2px solid rgba(255, 0, 0, 0.5);
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-
-        .cheat-btn:hover {
-            background: rgba(255, 0, 0, 0.9);
-            transform: scale(1.1);
-            box-shadow: 0 8px 24px rgba(255, 0, 0, 0.5);
-        }
-
-        .cheat-btn:active {
-            transform: scale(0.95);
-        }
-
         .deep-breath-screen {
             position: fixed;
             top: 0;
@@ -511,9 +478,6 @@
 </head>
 <body>
     <button class="back-btn" onclick="goBack()" title="Back to Math Games">←</button>
-    
-    <!-- Cheat button for unlocking all levels -->
-    <button class="cheat-btn" onclick="unlockAllLevels()" title="Unlock All Levels">🔓</button>
     
     <div class="game-container">
         <!-- Level Selection Screen -->

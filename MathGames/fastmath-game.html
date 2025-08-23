@@ -457,12 +457,12 @@
                     </div>
                 </div>
                 
-                <div class="level-card locked" onclick="selectLevel(3)">
-                    <div class="level-icon">🔒</div>
-                    <div class="level-name">Level 3: Coming Soon</div>
+                <div class="level-card" id="level3Card" onclick="selectLevel(3)">
+                    <div class="level-icon">�</div>
+                    <div class="level-name">Level 3: Ultimate Challenge</div>
                     <div class="level-description">
-                        The ultimate mathematical challenge!<br>
-                        This level will be unlocked soon.
+                        15 rounds with decreasing time limits<br>
+                        Health system • 80% accuracy required
                     </div>
                 </div>
             </div>
@@ -472,7 +472,6 @@
         <div id="startScreen" class="start-screen hidden">
             <div class="game-header">
                 <div class="game-title">⚡ FastMath ⚡</div>
-                <button class="practice-btn" id="practiceBtn2" onclick="startPracticeMode()" title="Practice Mode">∞</button>
             </div>
             <div class="start-title">Level 1: Classic FastMath</div>
             <div class="start-description">
@@ -490,7 +489,6 @@
         <div id="timeSelectionScreen" class="start-screen hidden">
             <div class="game-header">
                 <div class="game-title">⚡ FastMath ⚡</div>
-                <button class="practice-btn" id="practiceBtn3" onclick="startPracticeMode()" title="Practice Mode">∞</button>
             </div>
             <div class="start-title">Level 2: Time Attack</div>
             <div class="start-description">
@@ -518,11 +516,40 @@
             <button class="back-to-levels-btn" onclick="backToLevels()">← Back to Levels</button>
         </div>
 
+        <!-- Level 3 Options Screen -->
+        <div id="level3OptionsScreen" class="start-screen hidden">
+            <div class="game-header">
+                <div class="game-title">🚀 Ultimate Challenge 🚀</div>
+            </div>
+            <div class="start-title">Level 3: Ultimate Challenge</div>
+            <div class="start-description">
+                🎯 <strong>15 rounds</strong> of ultimate mathematical challenge!<br>
+                ⏱️ <strong>Decreasing time limits:</strong> 6s → 4s → 2.5s per question<br>
+                🎯 <strong>Goal:</strong> 80% accuracy with 1+ life remaining<br>
+                🔄 Choose your difficulty mode below!
+            </div>
+            
+            <div class="levels-grid">
+                <div class="level-card" onclick="startLevel3(true)">
+                    <div class="level-icon">❤️</div>
+                    <div class="level-name">With Health System</div>
+                    <div class="level-description">3 lives • Wrong answers cost health</div>
+                </div>
+                
+                <div class="level-card" onclick="startLevel3(false)">
+                    <div class="level-icon">⚡</div>
+                    <div class="level-name">No Health System</div>
+                    <div class="level-description">Pure endurance • No life penalties</div>
+                </div>
+            </div>
+            
+            <button class="back-to-levels-btn" onclick="backToLevels()">← Back to Levels</button>
+        </div>
+
         <!-- Game Screen -->
         <div id="gameScreen" class="hidden">
             <div class="game-header">
                 <div class="game-title">⚡ FastMath ⚡</div>
-                <button class="practice-btn" id="practiceBtn4" onclick="startPracticeMode()" title="Practice Mode">∞</button>
             </div>
             
             <div class="progress-bar">
@@ -555,7 +582,6 @@
         <div id="timeAttackScreen" class="hidden">
             <div class="game-header">
                 <div class="game-title">⚡ Time Attack ⚡</div>
-                <button class="practice-btn" id="practiceBtn5" onclick="startPracticeMode()" title="Practice Mode">∞</button>
             </div>
             
             <div class="game-info">
@@ -584,6 +610,42 @@
             </div>
         </div>
 
+        <!-- Level 3 Game Screen -->
+        <div id="level3Screen" class="hidden">
+            <div class="game-header">
+                <div class="game-title">🚀 Ultimate Challenge 🚀</div>
+            </div>
+            
+            <div class="progress-bar">
+                <div id="level3ProgressFill" class="progress-fill" style="width: 0%"></div>
+            </div>
+            
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Round</div>
+                    <div id="level3RoundNumber" class="info-value">1</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Time</div>
+                    <div id="level3Timer" class="info-value timer">6</div>
+                </div>
+                <div class="info-item" id="level3HealthDisplay">
+                    <div class="info-label">Lives</div>
+                    <div id="level3Lives" class="info-value">❤️❤️❤️</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Accuracy</div>
+                    <div id="level3Accuracy" class="info-value">100%</div>
+                </div>
+            </div>
+
+            <div id="level3Equation" class="equation"></div>
+            
+            <div class="input-container">
+                <input type="text" id="level3Input" class="answer-input" placeholder="?" autocomplete="off" inputmode="numeric">
+            </div>
+        </div>
+
         <!-- Rest Screen -->
         <div id="restScreen" class="hidden rest-screen">
             <div class="rest-title">🎉 Halfway There! 🎉</div>
@@ -598,7 +660,6 @@
         <div id="gameOverScreen" class="hidden game-over">
             <div class="game-header">
                 <div id="gameOverTitle" class="game-over-title"></div>
-                <button class="practice-btn" id="practiceBtn6" onclick="startPracticeMode()" title="Practice Mode">∞</button>
             </div>
             <div id="finalScore" class="final-score"></div>
             <button class="restart-btn" onclick="resetGame()">Play Again</button>
@@ -651,6 +712,7 @@
         let isGameActive = false;
         let selectedLevel = 1; // Track which level is selected
         let hasCompletedLevel1 = localStorage.getItem('fastmath-level1-completed') === 'true'; // Track level completion
+        let hasCompletedLevel2 = localStorage.getItem('fastmath-level2-completed') === 'true'; // Track Level 2 completion
         
         // Level 2 specific variables
         let totalQuestions = 0;
@@ -659,6 +721,11 @@
         let gameDuration = 60; // Default 1 minute
         let questionTimer = null; // Timer for individual questions in Level 2
         let questionTimeLeft = 5; // 5 seconds per question
+        
+        // Level 3 specific variables
+        let level3Lives = 3;
+        let level3WithHealth = true;
+        let level3CurrentRound = 1;
         
         // Practice mode variables
         let consecutiveFailures = parseInt(localStorage.getItem('fastmath-consecutive-failures') || '0');
@@ -690,9 +757,14 @@
                 } else {
                     alert('Complete Level 1 first to unlock Time Attack mode!');
                 }
-            } else {
-                // Level 3 is locked for now
-                alert('This level is coming soon! Stay tuned for more challenging math games.');
+            } else if (level === 3) {
+                // Check if Level 3 is unlocked
+                if (hasCompletedLevel2) {
+                    document.getElementById('levelSelectionScreen').classList.add('hidden');
+                    document.getElementById('level3OptionsScreen').classList.remove('hidden');
+                } else {
+                    alert('Complete Level 2 with 90% accuracy and 15+ questions to unlock Level 3!');
+                }
             }
         }
 
@@ -701,8 +773,10 @@
             // Hide all screens except level selection
             document.getElementById('startScreen').classList.add('hidden');
             document.getElementById('timeSelectionScreen').classList.add('hidden');
+            document.getElementById('level3OptionsScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.add('hidden');
             document.getElementById('timeAttackScreen').classList.add('hidden');
+            document.getElementById('level3Screen').classList.add('hidden');
             document.getElementById('restScreen').classList.add('hidden');
             document.getElementById('gameOverScreen').classList.add('hidden');
             document.getElementById('practiceScreen').classList.add('hidden');
@@ -711,37 +785,36 @@
             // Reset game state
             resetGameState();
             
-            // Update level 2 unlock status and practice button
+            // Update level unlock status and practice button
             updateLevelUnlockStatus();
             updatePracticeButtonVisibility();
         }
 
         // Update practice button visibility
         function updatePracticeButtonVisibility() {
-            const practiceButtons = [
-                document.getElementById('practiceBtn'),
-                document.getElementById('practiceBtn2'),
-                document.getElementById('practiceBtn3'),
-                document.getElementById('practiceBtn4'),
-                document.getElementById('practiceBtn5'),
-                document.getElementById('practiceBtn6')
-            ];
+            const practiceButton = document.getElementById('practiceBtn');
             
-            // Always show practice button
-            practiceButtons.forEach(btn => {
-                if (btn) {
-                    btn.classList.add('show');
-                }
-            });
+            // Always show practice button on homepage
+            if (practiceButton) {
+                practiceButton.classList.add('show');
+            }
         }
 
         // Update level unlock status
         function updateLevelUnlockStatus() {
             const level2Card = document.getElementById('level2Card');
+            const level3Card = document.getElementById('level3Card');
+            
             if (hasCompletedLevel1) {
                 level2Card.classList.remove('locked');
             } else {
                 level2Card.classList.add('locked');
+            }
+            
+            if (hasCompletedLevel2) {
+                level3Card.classList.remove('locked');
+            } else {
+                level3Card.classList.add('locked');
             }
         }
 
@@ -762,6 +835,11 @@
             totalQuestions = 0;
             correctAnswers = 0;
             questionTimeLeft = 5;
+            
+            // Reset Level 3 specific variables
+            level3Lives = 3;
+            level3WithHealth = true;
+            level3CurrentRound = 1;
             
             // Reset practice mode variables
             practiceQuestionCount = 0;
@@ -801,6 +879,215 @@
             currentAnswer = x * y + z;
             
             document.getElementById('practiceEquation').textContent = `${x} × ${y} + ${z} = ?`;
+        }
+
+        // Generate equation for Level 3
+        function generateLevel3Equation() {
+            const x = randomNumber(1, 10);
+            const y = randomNumber(1, 10);
+            const z = randomNumber(1, 10);
+            
+            currentAnswer = x * y + z;
+            
+            document.getElementById('level3Equation').textContent = `${x} × ${y} + ${z} = ?`;
+        }
+
+        // Level 3 Functions
+        function startLevel3(withHealth) {
+            level3WithHealth = withHealth;
+            level3Lives = 3;
+            level3CurrentRound = 1;
+            totalQuestions = 0;
+            correctAnswers = 0;
+            isGameActive = true;
+            
+            document.getElementById('level3OptionsScreen').classList.add('hidden');
+            document.getElementById('level3Screen').classList.remove('hidden');
+            
+            // Show/hide health display based on mode
+            if (level3WithHealth) {
+                document.getElementById('level3HealthDisplay').style.display = 'block';
+            } else {
+                document.getElementById('level3HealthDisplay').style.display = 'none';
+            }
+            
+            updateLevel3Display();
+            generateLevel3Equation();
+            startLevel3Timer();
+            
+            // Focus on input
+            document.getElementById('level3Input').focus();
+        }
+
+        function getLevel3TimeLimit() {
+            if (level3CurrentRound <= 5) return 6;
+            if (level3CurrentRound <= 10) return 4;
+            return 2.5;
+        }
+
+        function startLevel3Timer() {
+            timeLeft = getLevel3TimeLimit();
+            updateLevel3Timer();
+            
+            gameTimer = setInterval(() => {
+                timeLeft -= 0.1; // More precise timing for 2.5 seconds
+                updateLevel3Timer();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    handleLevel3Timeout();
+                }
+            }, 100);
+        }
+
+        function updateLevel3Timer() {
+            const timerElement = document.getElementById('level3Timer');
+            timerElement.textContent = Math.max(0, timeLeft).toFixed(1);
+            
+            // Add warning animation when time is low
+            if (timeLeft <= 2) {
+                timerElement.classList.add('warning');
+            } else {
+                timerElement.classList.remove('warning');
+            }
+        }
+
+        function updateLevel3Display() {
+            document.getElementById('level3RoundNumber').textContent = level3CurrentRound;
+            
+            // Update progress bar
+            const progress = (level3CurrentRound - 1) / 15 * 100;
+            document.getElementById('level3ProgressFill').style.width = progress + '%';
+            
+            // Update health display
+            if (level3WithHealth) {
+                let heartsDisplay = '';
+                for (let i = 0; i < level3Lives; i++) {
+                    heartsDisplay += '❤️';
+                }
+                for (let i = level3Lives; i < 3; i++) {
+                    heartsDisplay += '🖤';
+                }
+                document.getElementById('level3Lives').textContent = heartsDisplay;
+            }
+            
+            // Update accuracy
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 100;
+            document.getElementById('level3Accuracy').textContent = accuracy + '%';
+        }
+
+        function handleLevel3Timeout() {
+            if (!isGameActive) return;
+            
+            totalQuestions++;
+            
+            if (level3WithHealth) {
+                level3Lives--;
+                if (level3Lives <= 0) {
+                    level3GameOver(false, 'No lives remaining!');
+                    return;
+                }
+            }
+            
+            // Shake animation for timeout
+            document.querySelector('.game-container').classList.add('shake');
+            setTimeout(() => {
+                document.querySelector('.game-container').classList.remove('shake');
+            }, 500);
+            
+            updateLevel3Display();
+            nextLevel3Round();
+        }
+
+        function checkLevel3Answer() {
+            if (!isGameActive) return;
+            
+            const inputValue = document.getElementById('level3Input').value.trim();
+            const userAnswer = parseInt(inputValue);
+            
+            // Check if input is empty or not a valid number
+            if (!inputValue || isNaN(userAnswer)) {
+                // Shake animation for invalid input
+                document.querySelector('.game-container').classList.add('shake');
+                setTimeout(() => {
+                    document.querySelector('.game-container').classList.remove('shake');
+                }, 500);
+                return;
+            }
+            
+            clearInterval(gameTimer);
+            totalQuestions++;
+            
+            if (userAnswer === currentAnswer) {
+                correctAnswers++;
+                // Celebrate correct answer
+                document.querySelector('.game-container').classList.add('celebrate');
+                setTimeout(() => {
+                    document.querySelector('.game-container').classList.remove('celebrate');
+                }, 600);
+            } else {
+                if (level3WithHealth) {
+                    level3Lives--;
+                    if (level3Lives <= 0) {
+                        level3GameOver(false, 'No lives remaining!');
+                        return;
+                    }
+                }
+                
+                // Shake animation for wrong answer
+                document.querySelector('.game-container').classList.add('shake');
+                setTimeout(() => {
+                    document.querySelector('.game-container').classList.remove('shake');
+                }, 500);
+            }
+            
+            updateLevel3Display();
+            
+            if (level3CurrentRound >= 15) {
+                // Check victory conditions
+                const accuracy = Math.round((correctAnswers / totalQuestions) * 100);
+                if (accuracy >= 80 && (!level3WithHealth || level3Lives >= 1)) {
+                    level3GameOver(true, `Victory! ${accuracy}% accuracy with ${level3Lives} lives remaining!`);
+                } else {
+                    level3GameOver(false, `Failed! Need 80% accuracy and 1+ life. Got ${accuracy}% with ${level3Lives} lives.`);
+                }
+            } else {
+                nextLevel3Round();
+            }
+        }
+
+        function nextLevel3Round() {
+            level3CurrentRound++;
+            document.getElementById('level3Input').value = '';
+            generateLevel3Equation();
+            startLevel3Timer();
+            document.getElementById('level3Input').focus();
+        }
+
+        function level3GameOver(victory, message) {
+            isGameActive = false;
+            clearInterval(gameTimer);
+            
+            if (victory) {
+                hasCompletedLevel2 = true; // This should be level 3, but keeping consistent with pattern
+                localStorage.setItem('fastmath-level3-completed', 'true');
+            }
+            
+            document.getElementById('level3Screen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+            
+            const titleElement = document.getElementById('gameOverTitle');
+            const scoreElement = document.getElementById('finalScore');
+            
+            if (victory) {
+                titleElement.textContent = '🚀 ULTIMATE VICTORY! 🚀';
+                titleElement.className = 'game-over-title victory';
+                scoreElement.textContent = message;
+            } else {
+                titleElement.textContent = '💥 Challenge Failed 💥';
+                titleElement.className = 'game-over-title defeat';
+                scoreElement.textContent = message;
+            }
         }
 
         // Start Time Attack mode
@@ -958,6 +1245,12 @@
             
             const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
             
+            // Check if Level 3 should be unlocked (90% accuracy and 15+ questions)
+            if (accuracy >= 90 && totalQuestions >= 15) {
+                hasCompletedLevel2 = true;
+                localStorage.setItem('fastmath-level2-completed', 'true');
+            }
+            
             document.getElementById('timeAttackScreen').classList.add('hidden');
             document.getElementById('gameOverScreen').classList.remove('hidden');
             
@@ -974,7 +1267,12 @@
             else if (accuracy >= 60) performanceMessage = 'Keep practicing!';
             else performanceMessage = 'Room for improvement!';
             
-            scoreElement.textContent = `${performanceMessage}\n\nQuestions Answered: ${totalQuestions}\nCorrect Answers: ${correctAnswers}\nAccuracy: ${accuracy}%\n\nDuration: ${gameDuration === 60 ? '1' : '2'} minute${gameDuration === 60 ? '' : 's'}`;
+            let level3UnlockMessage = '';
+            if (accuracy >= 90 && totalQuestions >= 15) {
+                level3UnlockMessage = '\n🚀 Level 3 unlocked!';
+            }
+            
+            scoreElement.textContent = `${performanceMessage}\n\nQuestions Answered: ${totalQuestions}\nCorrect Answers: ${correctAnswers}\nAccuracy: ${accuracy}%\n\nDuration: ${gameDuration === 60 ? '1' : '2'} minute${gameDuration === 60 ? '' : 's'}${level3UnlockMessage}`;
         }
 
         // Start the game
@@ -1168,6 +1466,8 @@
                 document.getElementById('startScreen').classList.remove('hidden');
             } else if (selectedLevel === 2) {
                 document.getElementById('timeSelectionScreen').classList.remove('hidden');
+            } else if (selectedLevel === 3) {
+                document.getElementById('level3OptionsScreen').classList.remove('hidden');
             }
         }
 
@@ -1188,8 +1488,10 @@
             document.getElementById('levelSelectionScreen').classList.add('hidden');
             document.getElementById('startScreen').classList.add('hidden');
             document.getElementById('timeSelectionScreen').classList.add('hidden');
+            document.getElementById('level3OptionsScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.add('hidden');
             document.getElementById('timeAttackScreen').classList.add('hidden');
+            document.getElementById('level3Screen').classList.add('hidden');
             document.getElementById('restScreen').classList.add('hidden');
             document.getElementById('gameOverScreen').classList.add('hidden');
             
@@ -1350,6 +1652,21 @@
             }
         });
 
+        // Level 3 input event listeners
+        document.getElementById('level3Input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                checkLevel3Answer();
+            }
+        });
+
+        document.getElementById('level3Input').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                checkLevel3Answer();
+            }
+        });
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             updateLevelUnlockStatus();
@@ -1359,6 +1676,8 @@
         // Reset level unlocks when user leaves the page
         window.addEventListener('beforeunload', function() {
             localStorage.removeItem('fastmath-level1-completed');
+            localStorage.removeItem('fastmath-level2-completed');
+            localStorage.removeItem('fastmath-level3-completed');
             localStorage.removeItem('fastmath-consecutive-failures');
         });
     </script>

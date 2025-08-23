@@ -421,10 +421,99 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
         }
+
+        .cheat-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(255, 0, 0, 0.3);
+            border: 2px solid rgba(255, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .cheat-btn:hover {
+            background: rgba(255, 0, 0, 0.9);
+            transform: scale(1.1);
+            box-shadow: 0 8px 24px rgba(255, 0, 0, 0.5);
+        }
+
+        .cheat-btn:active {
+            transform: scale(0.95);
+        }
+
+        .deep-breath-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+            text-align: center;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box;
+        }
+
+        .deep-breath-screen:not(.hidden) {
+            display: flex !important;
+        }
+
+        .deep-breath-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: breatheIn 5s ease-in-out;
+        }
+
+        .deep-breath-subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: breatheIn 5s ease-in-out 0.5s;
+        }
+
+        .breath-timer {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes breatheIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body>
     <button class="back-btn" onclick="goBack()" title="Back to Math Games">←</button>
+    
+    <!-- Cheat button for unlocking all levels -->
+    <button class="cheat-btn" onclick="unlockAllLevels()" title="Unlock All Levels">🔓</button>
     
     <div class="game-container">
         <!-- Level Selection Screen -->
@@ -700,6 +789,15 @@
             
             <button class="back-to-levels-btn" onclick="exitPracticeMode()">← Back to Levels</button>
         </div>
+
+        </div>
+    </div>
+
+    <!-- Deep Breath Screen for Level 3 (moved outside game container) -->
+    <div id="deepBreathScreen" class="deep-breath-screen hidden">
+        <div class="deep-breath-title">💙 Take a deep breath 💙</div>
+        <div class="deep-breath-subtitle">and regain your rhythm</div>
+        <div id="breathTimer" class="breath-timer">5</div>
     </div>
 
     <script>
@@ -780,6 +878,7 @@
             document.getElementById('restScreen').classList.add('hidden');
             document.getElementById('gameOverScreen').classList.add('hidden');
             document.getElementById('practiceScreen').classList.add('hidden');
+            document.getElementById('deepBreathScreen').classList.add('hidden');
             document.getElementById('levelSelectionScreen').classList.remove('hidden');
             
             // Reset game state
@@ -986,6 +1085,10 @@
                 if (level3Lives <= 0) {
                     level3GameOver(false, 'No lives remaining!');
                     return;
+                } else {
+                    // Show deep breath screen when health is lost due to timeout
+                    showDeepBreathScreen();
+                    return;
                 }
             }
             
@@ -1030,6 +1133,10 @@
                     level3Lives--;
                     if (level3Lives <= 0) {
                         level3GameOver(false, 'No lives remaining!');
+                        return;
+                    } else {
+                        // Show deep breath screen when health is lost
+                        showDeepBreathScreen();
                         return;
                     }
                 }
@@ -1088,6 +1195,36 @@
                 titleElement.className = 'game-over-title defeat';
                 scoreElement.textContent = message;
             }
+        }
+
+        // Show deep breath screen when player loses a heart
+        function showDeepBreathScreen() {
+            // Hide the game screen
+            document.getElementById('level3Screen').classList.add('hidden');
+            
+            // Show the deep breath screen
+            document.getElementById('deepBreathScreen').classList.remove('hidden');
+            
+            // Start the 5-second countdown
+            let breathTime = 5;
+            document.getElementById('breathTimer').textContent = breathTime;
+            
+            const breathTimer = setInterval(() => {
+                breathTime--;
+                document.getElementById('breathTimer').textContent = breathTime;
+                
+                if (breathTime <= 0) {
+                    clearInterval(breathTimer);
+                    
+                    // Hide deep breath screen and return to game
+                    document.getElementById('deepBreathScreen').classList.add('hidden');
+                    document.getElementById('level3Screen').classList.remove('hidden');
+                    
+                    // Update display and continue with next round
+                    updateLevel3Display();
+                    nextLevel3Round();
+                }
+            }, 1000);
         }
 
         // Start Time Attack mode
@@ -1669,6 +1806,9 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
+            // Ensure deep breath screen is hidden on load
+            document.getElementById('deepBreathScreen').classList.add('hidden');
+            
             updateLevelUnlockStatus();
             updatePracticeButtonVisibility();
         });

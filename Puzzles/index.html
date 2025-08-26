@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzles - Sky Tomato</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .game-container {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-container:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .game-container:hover::before {
+            opacity: 1;
+        }
+
+        .game-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-description {
+            font-size: 1rem;
+            color: #555;
+            line-height: 1.5;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 1.5rem;
+        }
+
+        .game-status {
+            background: rgba(255, 255, 255, 0.8);
+            color: #666;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .master-mazes {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .memory-monster {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .game-container {
+                min-height: 250px;
+            }
+        }
+
+        .footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="../index.html" class="back-button">← Back to Portfolio</a>
+            <h1>🧩 Puzzles</h1>
+            <p class="subtitle">Challenge your mind with these brain-teasing puzzle games!</p>
+        </div>
+        
+        <div class="games-grid">
+            <div class="game-container master-mazes" onclick="startMasterMazes()">
+                <div class="game-icon">🏰</div>
+                <div class="game-title">Master Mazes</div>
+                <div class="game-description">Navigate through intricate mazes and find your way to the exit. Test your problem-solving skills with increasingly challenging levels!</div>
+                <div class="game-status">Coming Soon</div>
+            </div>
+            
+            <div class="game-container memory-monster" onclick="startMemoryMonster()">
+                <div class="game-icon">👾</div>
+                <div class="game-title">Memory Monster</div>
+                <div class="game-description">Train your memory with this colorful pattern-matching game. Watch the sequence and repeat it back to defeat the memory monster!</div>
+                <div class="game-status">Coming Soon</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>More puzzle games coming soon! 🎮</p>
+        </div>
+    </div>
+
+    <script>
+        function startMasterMazes() {
+            // Placeholder function for Master Mazes game
+            alert('Master Mazes game will be implemented soon! 🏰\n\nThis will be an exciting maze navigation game with multiple levels and challenges.');
+        }
+
+        function startMemoryMonster() {
+            // Placeholder function for Memory Monster game
+            alert('Memory Monster game will be implemented soon! 👾\n\nThis will be a fun memory training game with colorful patterns and sequences.');
+        }
+
+        // Add some interactive hover effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const gameContainers = document.querySelectorAll('.game-container');
+            
+            gameContainers.forEach(container => {
+                container.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                });
+                
+                container.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

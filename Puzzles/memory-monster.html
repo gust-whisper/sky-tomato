@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+<hea        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.05);
+            pointer-events: none;
+            z-index: 0;
+        }set="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Monster - Sky Tomato</title>
+    <title>Memory Memoir - Sky Tomato</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +22,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ffb3d1 0%, #ffc8dd 50%, #ffafcc 100%);
+            background: url('CBB.jpg') center/cover no-repeat fixed;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -30,13 +39,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                radial-gradient(circle at 15% 15%, rgba(255, 182, 193, 0.3) 0%, transparent 25%),
-                radial-gradient(circle at 85% 15%, rgba(255, 182, 193, 0.3) 0%, transparent 25%),
-                radial-gradient(circle at 15% 85%, rgba(255, 182, 193, 0.3) 0%, transparent 25%),
-                radial-gradient(circle at 85% 85%, rgba(255, 182, 193, 0.3) 0%, transparent 25%);
+            background: rgba(255, 255, 255, 0.1);
             pointer-events: none;
-            z-index: -1;
+            z-index: 0;
         }
 
         body::after {
@@ -57,62 +62,19 @@
             place-items: center;
         }
 
-        @keyframes floatFlowers {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(180deg); }
-            100% { transform: translateY(0px) rotate(360deg); }
-        }
-
-        /* Corner flower clusters */
-        .flower-cluster {
-            position: fixed;
-            font-size: 3rem;
-            opacity: 0.15;
-            pointer-events: none;
-            z-index: -1;
-            animation: gentleFloat 8s ease-in-out infinite;
-        }
-
-        .flower-cluster.top-left {
-            top: 20px;
-            left: 20px;
-            transform-origin: center;
-        }
-
-        .flower-cluster.top-right {
-            top: 20px;
-            right: 20px;
-            transform-origin: center;
-        }
-
-        .flower-cluster.bottom-left {
-            bottom: 20px;
-            left: 20px;
-            transform-origin: center;
-        }
-
-        .flower-cluster.bottom-right {
-            bottom: 20px;
-            right: 20px;
-            transform-origin: center;
-        }
-
-        @keyframes gentleFloat {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-5px) rotate(2deg); }
-        }
+        /* Corner flower clusters - removed for CBB.jpg background */
 
         .container {
             max-width: 900px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             padding: 3rem;
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
             position: relative;
-            z-index: 1;
+            z-index: 2;
         }
 
         .header {
@@ -215,21 +177,22 @@
         }
 
         .start-button {
-            background: linear-gradient(135deg, #ff69b4, #ff91a4);
+            background: linear-gradient(135deg, #ff4081, #e91e63, #ff6b35);
             color: white;
             border: none;
             padding: 0.8rem 1.5rem;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 64, 129, 0.3);
         }
 
         .start-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            background: linear-gradient(135deg, #ff1493, #ff69b4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 64, 129, 0.4);
+            background: linear-gradient(135deg, #e91e63, #ff4081, #ff5722);
         }
 
         /* Game Screen */
@@ -372,16 +335,10 @@
     </style>
 </head>
 <body>
-    <!-- Flower clusters in corners -->
-    <div class="flower-cluster top-left">🌸🌸🌸<br>🌸🌸🌸<br>🌸🌸🌸</div>
-    <div class="flower-cluster top-right">🌸🌸🌸<br>🌸🌸🌸<br>🌸🌸🌸</div>
-    <div class="flower-cluster bottom-left">🌸🌸🌸<br>🌸🌸🌸<br>🌸🌸🌸</div>
-    <div class="flower-cluster bottom-right">🌸🌸🌸<br>🌸🌸🌸<br>🌸🌸🌸</div>
-
     <div class="container">
         <div class="header">
             <a href="index.html" class="back-button">← Back to Puzzles</a>
-            <h1>👾 Memory Monster</h1>
+            <h1>🌸 Memory Memoir 🌸</h1>
             <p class="subtitle">Train your memory with these challenging games!</p>
         </div>
 
@@ -389,7 +346,7 @@
         <div class="game-selection" id="gameSelection">
             <div class="game-options">
                 <div class="game-option">
-                    <div class="option-title">
+                    <div class="option-title" style="background: linear-gradient(135deg, #ff4081, #e91e63, #ff6b35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                         🎯 Color Clicker
                     </div>
                     <div class="option-description">

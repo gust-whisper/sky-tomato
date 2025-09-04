@@ -5,12 +5,5 @@ Please create a basketball shooting game using html and javascript. Following ar
 4) When the mouse is pulled away from the ball, the user can move it around to change the angle to shoot the basketball
 5) When user releases the mouse button, the basketball will be shoot out and follow a parabolic motion.
 6) When the basketball falls into the hoop, the user score a point.
-Ok lets start working on the Memory Monster game, using javascript and HTML can you make the Memory Monster game contain 
-3 options when you click in from the Puzzles Homepage, the first one is called Color Clicker which has a customizable number 
-next to the level which you can change, once the user enters a number and clicks the enter button right below the option title 
-then it will bring them into the level where the number they enters is the amount of times a large circle will be split into. 
-So if the user enters 2 then the circle will be split into two sections. Then after a five second countdown the game will start 
-by flashing one of the colors, then the users will have to click that color, and then next round two the color from the last round 
-and a new color will be flashed, and this will stack. The player has infinite time to click the pattern, and if they mess up it will 
-show how many round they completed. The other options I will tell later in another prompt
 
+Can you create a level two for the Memory Memoir game, when the user clicks into the game it will bring them to a 5 by 6 square rectangular white grid, this game will be split into 5 levels with each level having three rounds. The first level will start off with 3 squares lighting up cherry pink for 1 second, then returning back to normal after the second. The user has to click three squares which will light up, and then press the enter button to lock in their answer, if they click a lit up square it will unlight. If the user clicks the enter button and all three lit up squares are the ones originially flashed, then the next round will start in three seconds. I'll discribe the next round in the next prompt.

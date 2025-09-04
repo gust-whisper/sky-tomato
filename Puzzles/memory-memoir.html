@@ -1,16 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<hea        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.05);
-            pointer-events: none;
-            z-index: 0;
-        }set="UTF-8">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Memoir - Sky Tomato</title>
     <style>
@@ -312,6 +303,162 @@
             background: linear-gradient(135deg, #ff1493, #ff69b4);
         }
 
+        /* Grid Memory Game Styles */
+        .grid-game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .grid-memory-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .grid-square {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .grid-square:hover {
+            border-color: #ff69b4;
+            transform: scale(1.05);
+        }
+
+        .grid-square.flashing {
+            background: #ff69b4;
+            border-color: #ff1493;
+        }
+
+        .grid-square.flashing.round-1 {
+            animation: gridFlash1 1s ease-in-out;
+        }
+
+        .grid-square.flashing.round-2 {
+            animation: gridFlash2 0.6s ease-in-out;
+        }
+
+        .grid-square.flashing.round-3 {
+            animation: gridFlash3 0.3s ease-in-out;
+        }
+
+        .grid-square.player-selected {
+            background: #ff69b4;
+            border-color: #ff1493;
+        }
+
+        .grid-square.correct {
+            background: #4caf50;
+            border-color: #388e3c;
+        }
+
+        .grid-square.incorrect {
+            background: #f44336;
+            border-color: #d32f2f;
+        }
+
+        @keyframes gridFlash1 {
+            0%, 100% { 
+                background: white;
+                border-color: #ddd;
+            }
+            50% { 
+                background: #ff69b4;
+                border-color: #ff1493;
+            }
+        }
+
+        @keyframes gridFlash2 {
+            0%, 100% { 
+                background: white;
+                border-color: #ddd;
+            }
+            50% { 
+                background: #ff69b4;
+                border-color: #ff1493;
+            }
+        }
+
+        @keyframes gridFlash3 {
+            0%, 100% { 
+                background: white;
+                border-color: #ddd;
+            }
+            50% { 
+                background: #ff69b4;
+                border-color: #ff1493;
+            }
+        }
+
+        .grid-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .enter-button {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .enter-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+            background: linear-gradient(135deg, #388e3c, #4caf50);
+        }
+
+        .enter-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .level-progress {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .level-info {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .round-info {
+            font-size: 1rem;
+            color: #666;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 2rem;
@@ -330,6 +477,17 @@
             .game-info {
                 flex-direction: column;
                 text-align: center;
+            }
+
+            .grid-square {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+            
+            .grid-memory-grid {
+                gap: 6px;
+                padding: 15px;
             }
         }
     </style>
@@ -359,12 +517,15 @@
                     </div>
                 </div>
 
-                <div class="game-option" style="opacity: 0.6;">
-                    <div class="option-title">
+                <div class="game-option">
+                    <div class="option-title" style="background: linear-gradient(135deg, #9c27b0, #e91e63, #ff5722); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                         🧠 Pattern Memory
                     </div>
                     <div class="option-description">
-                        Coming soon! Test your spatial memory with grid patterns.
+                        Watch squares light up in a 5x6 grid, then recreate the pattern. Complete 3 rounds with 3 squares each!
+                    </div>
+                    <div class="level-input-container">
+                        <button class="start-button" onclick="startGridMemory()">Enter</button>
                     </div>
                 </div>
 
@@ -401,6 +562,41 @@
                 <h3>Game Over!</h3>
                 <div class="final-score" id="finalScore">You completed 0 rounds!</div>
                 <button class="play-again-button" onclick="restartGame()">Play Again</button>
+                <button class="play-again-button" onclick="backToSelection()" style="margin-left: 1rem;">Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Grid Memory Game Screen -->
+        <div class="game-screen" id="gridGameScreen" style="display: none;">
+            <div class="game-info">
+                <div class="level-progress">
+                    <div class="level-info" id="gridLevelInfo">Level 1 - Round 1</div>
+                    <div class="round-info" id="gridRoundInfo">Remember the pattern of 3 squares</div>
+                </div>
+                <div class="countdown" id="gridCountdown"></div>
+                <button class="start-button" onclick="backToSelection()">Back to Menu</button>
+            </div>
+
+            <div class="sequence-display" id="gridSequenceDisplay">
+                Get ready! Level 1 will start in 5 seconds...
+            </div>
+
+            <div class="grid-game-container">
+                <div class="grid-memory-grid" id="gridMemoryGrid">
+                    <!-- 5x6 grid (30 squares) will be generated dynamically -->
+                </div>
+                
+                <div class="grid-controls">
+                    <button class="enter-button" id="gridEnterButton" onclick="submitGridAnswer()" disabled>
+                        Enter Answer
+                    </button>
+                </div>
+            </div>
+
+            <div class="game-over" id="gridGameOver" style="display: none;">
+                <h3>Congratulations!</h3>
+                <div class="final-score" id="gridFinalScore">You completed all levels!</div>
+                <button class="play-again-button" onclick="restartGridGame()">Play Again</button>
                 <button class="play-again-button" onclick="backToSelection()" style="margin-left: 1rem;">Back to Menu</button>
             </div>
         </div>
@@ -610,8 +806,11 @@
         function backToSelection() {
             document.getElementById('gameSelection').style.display = 'block';
             document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('gridGameScreen').style.display = 'none';
             document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('gridGameOver').style.display = 'none';
             gameState.gameActive = false;
+            gridGameState.gameActive = false;
         }
 
         // Initialize the game
@@ -626,6 +825,286 @@
                 }
             });
         });
+
+        // Grid Memory Game Variables
+        let gridGameState = {
+            currentLevel: 1,
+            currentRound: 1,
+            maxLevel: 1,
+            roundsPerLevel: 3,
+            targetSquares: [],
+            playerSelectedSquares: [],
+            isShowingPattern: false,
+            isPlayerTurn: false,
+            gameActive: false,
+            gridSize: 30 // 5 rows x 6 columns
+        };
+
+        // Level configuration: number of squares to remember per level
+        const levelConfig = {
+            1: 3  // Level 1: 3 squares
+        };
+
+        function startGridMemory() {
+            gridGameState.currentLevel = 1;
+            gridGameState.currentRound = 1;
+            gridGameState.targetSquares = [];
+            gridGameState.playerSelectedSquares = [];
+            gridGameState.gameActive = true;
+
+            document.getElementById('gameSelection').style.display = 'none';
+            document.getElementById('gridGameScreen').style.display = 'block';
+            document.getElementById('gridGameOver').style.display = 'none';
+
+            createGridMemoryGame();
+            startGridCountdown();
+        }
+
+        function createGridMemoryGame() {
+            const grid = document.getElementById('gridMemoryGrid');
+            grid.innerHTML = '';
+
+            // Create 5x6 grid (30 squares)
+            for (let i = 0; i < gridGameState.gridSize; i++) {
+                const square = document.createElement('div');
+                square.className = 'grid-square';
+                square.id = `grid-square-${i}`;
+                square.addEventListener('click', () => handleGridSquareClick(i));
+                grid.appendChild(square);
+            }
+        }
+
+        function startGridCountdown() {
+            let count = 5;
+            const countdownElement = document.getElementById('gridCountdown');
+            const sequenceDisplay = document.getElementById('gridSequenceDisplay');
+            
+            updateGridLevelDisplay();
+            
+            const countdownInterval = setInterval(() => {
+                countdownElement.textContent = count;
+                sequenceDisplay.textContent = `Get ready! Level ${gridGameState.currentLevel} will start in ${count} seconds...`;
+                count--;
+                
+                if (count < 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.textContent = '';
+                    startGridRound();
+                }
+            }, 1000);
+        }
+
+        function updateGridLevelDisplay() {
+            const levelInfo = document.getElementById('gridLevelInfo');
+            const roundInfo = document.getElementById('gridRoundInfo');
+            const squareCount = levelConfig[gridGameState.currentLevel];
+            
+            let flashTime;
+            switch (gridGameState.currentRound) {
+                case 1:
+                    flashTime = '1.0 second';
+                    break;
+                case 2:
+                    flashTime = '0.6 seconds';
+                    break;
+                case 3:
+                    flashTime = '0.3 seconds';
+                    break;
+                default:
+                    flashTime = '1.0 second';
+            }
+            
+            levelInfo.textContent = `Level ${gridGameState.currentLevel} - Round ${gridGameState.currentRound}`;
+            roundInfo.textContent = `Remember ${squareCount} squares (flash time: ${flashTime})`;
+        }
+
+        function startGridRound() {
+            gridGameState.playerSelectedSquares = [];
+            gridGameState.isPlayerTurn = false;
+            gridGameState.isShowingPattern = true;
+            
+            // Clear any previous selections
+            clearGridSelections();
+            
+            // Generate random target squares for this level
+            const squareCount = levelConfig[gridGameState.currentLevel];
+            gridGameState.targetSquares = [];
+            
+            while (gridGameState.targetSquares.length < squareCount) {
+                const randomSquare = Math.floor(Math.random() * gridGameState.gridSize);
+                if (!gridGameState.targetSquares.includes(randomSquare)) {
+                    gridGameState.targetSquares.push(randomSquare);
+                }
+            }
+            
+            updateGridLevelDisplay();
+            document.getElementById('gridSequenceDisplay').textContent = 'Watch the pattern...';
+            document.getElementById('gridEnterButton').disabled = true;
+            
+            // Show the pattern
+            showGridPattern();
+        }
+
+        function showGridPattern() {
+            // Determine flash duration based on current round
+            let flashDuration;
+            let roundClass;
+            switch (gridGameState.currentRound) {
+                case 1:
+                    flashDuration = 1000; // 1 second
+                    roundClass = 'round-1';
+                    break;
+                case 2:
+                    flashDuration = 600;  // 0.6 seconds
+                    roundClass = 'round-2';
+                    break;
+                case 3:
+                    flashDuration = 300;  // 0.3 seconds
+                    roundClass = 'round-3';
+                    break;
+                default:
+                    flashDuration = 1000; // Default to 1 second
+                    roundClass = 'round-1';
+            }
+            
+            // Flash all target squares simultaneously
+            gridGameState.targetSquares.forEach(squareIndex => {
+                const square = document.getElementById(`grid-square-${squareIndex}`);
+                square.classList.add('flashing', roundClass);
+            });
+            
+            // Remove flashing after the specified duration and start player turn immediately
+            setTimeout(() => {
+                gridGameState.targetSquares.forEach(squareIndex => {
+                    const square = document.getElementById(`grid-square-${squareIndex}`);
+                    square.classList.remove('flashing', roundClass);
+                });
+                
+                // Start player turn immediately when pattern disappears
+                gridGameState.isShowingPattern = false;
+                gridGameState.isPlayerTurn = true;
+                document.getElementById('gridSequenceDisplay').textContent = 'Click the squares that flashed, then press Enter!';
+                document.getElementById('gridEnterButton').disabled = false;
+            }, flashDuration);
+        }
+
+        function handleGridSquareClick(squareIndex) {
+            if (!gridGameState.isPlayerTurn || gridGameState.isShowingPattern) {
+                return;
+            }
+            
+            const square = document.getElementById(`grid-square-${squareIndex}`);
+            
+            if (gridGameState.playerSelectedSquares.includes(squareIndex)) {
+                // Unselect the square
+                gridGameState.playerSelectedSquares = gridGameState.playerSelectedSquares.filter(s => s !== squareIndex);
+                square.classList.remove('player-selected');
+            } else {
+                // Select the square
+                gridGameState.playerSelectedSquares.push(squareIndex);
+                square.classList.add('player-selected');
+            }
+        }
+
+        function submitGridAnswer() {
+            if (!gridGameState.isPlayerTurn) {
+                return;
+            }
+            
+            gridGameState.isPlayerTurn = false;
+            document.getElementById('gridEnterButton').disabled = true;
+            
+            // Check if the answer is correct
+            const isCorrect = arraysEqual(
+                gridGameState.playerSelectedSquares.sort(), 
+                gridGameState.targetSquares.sort()
+            );
+            
+            // Show correct/incorrect feedback
+            showGridFeedback(isCorrect);
+            
+            if (isCorrect) {
+                // Correct answer
+                setTimeout(() => {
+                    if (gridGameState.currentRound < gridGameState.roundsPerLevel) {
+                        // Next round in same level
+                        gridGameState.currentRound++;
+                        document.getElementById('gridSequenceDisplay').textContent = 'Correct! Next round starting in 3 seconds...';
+                        setTimeout(() => {
+                            startGridRound();
+                        }, 3000);
+                    } else {
+                        // Level 1 completed - game finished!
+                        endGridGame(true);
+                    }
+                }, 2000);
+            } else {
+                // Wrong answer - game over
+                setTimeout(() => {
+                    endGridGame(false);
+                }, 2000);
+            }
+        }
+
+        function showGridFeedback(isCorrect) {
+            // Show correct squares in green
+            gridGameState.targetSquares.forEach(squareIndex => {
+                const square = document.getElementById(`grid-square-${squareIndex}`);
+                square.classList.add('correct');
+            });
+            
+            if (!isCorrect) {
+                // Show incorrect selections in red
+                gridGameState.playerSelectedSquares.forEach(squareIndex => {
+                    if (!gridGameState.targetSquares.includes(squareIndex)) {
+                        const square = document.getElementById(`grid-square-${squareIndex}`);
+                        square.classList.add('incorrect');
+                    }
+                });
+            }
+        }
+
+        function clearGridSelections() {
+            for (let i = 0; i < gridGameState.gridSize; i++) {
+                const square = document.getElementById(`grid-square-${i}`);
+                square.classList.remove('player-selected', 'correct', 'incorrect', 'flashing');
+            }
+        }
+
+        function endGridGame(completed) {
+            gridGameState.gameActive = false;
+            gridGameState.isPlayerTurn = false;
+            
+            const gameOverElement = document.getElementById('gridGameOver');
+            const finalScoreElement = document.getElementById('gridFinalScore');
+            
+            if (completed) {
+                gameOverElement.querySelector('h3').textContent = 'Congratulations!';
+                finalScoreElement.textContent = 'You completed Level 1! Well done!';
+            } else {
+                gameOverElement.querySelector('h3').textContent = 'Game Over!';
+                const roundsCompleted = gridGameState.currentRound - 1;
+                finalScoreElement.textContent = `You completed ${roundsCompleted} round${roundsCompleted !== 1 ? 's' : ''} in Level 1!`;
+            }
+            
+            gameOverElement.style.display = 'block';
+        }
+
+        function restartGridGame() {
+            gridGameState.currentLevel = 1;
+            gridGameState.currentRound = 1;
+            gridGameState.targetSquares = [];
+            gridGameState.playerSelectedSquares = [];
+            gridGameState.gameActive = true;
+            
+            document.getElementById('gridGameOver').style.display = 'none';
+            createGridMemoryGame();
+            startGridCountdown();
+        }
+
+        function arraysEqual(a, b) {
+            return a.length === b.length && a.every((val, index) => val === b[index]);
+        }
     </script>
 </body>
 </html>

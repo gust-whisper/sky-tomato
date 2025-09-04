@@ -5,3 +5,12 @@ Please create a basketball shooting game using html and javascript. Following ar
 4) When the mouse is pulled away from the ball, the user can move it around to change the angle to shoot the basketball
 5) When user releases the mouse button, the basketball will be shoot out and follow a parabolic motion.
 6) When the basketball falls into the hoop, the user score a point.
+Ok lets start working on the Memory Monster game, using javascript and HTML can you make the Memory Monster game contain 
+3 options when you click in from the Puzzles Homepage, the first one is called Color Clicker which has a customizable number 
+next to the level which you can change, once the user enters a number and clicks the enter button right below the option title 
+then it will bring them into the level where the number they enters is the amount of times a large circle will be split into. 
+So if the user enters 2 then the circle will be split into two sections. Then after a five second countdown the game will start 
+by flashing one of the colors, then the users will have to click that color, and then next round two the color from the last round 
+and a new color will be flashed, and this will stack. The player has infinite time to click the pattern, and if they mess up it will 
+show how many round they completed. The other options I will tell later in another prompt
+

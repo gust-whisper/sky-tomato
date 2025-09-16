@@ -615,6 +615,110 @@
             font-size: 1.2rem;
         }
 
+        .pi-checker {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .pi-checker h3 {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+
+        .pi-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        #piInput {
+            width: 100%;
+            padding: 1rem;
+            padding-right: 4rem;
+            font-size: 1.1rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        #piInput:focus {
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 1);
+        }
+
+        #piInput.error {
+            border-color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .pi-counter {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 0.5rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            min-width: 2rem;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .pi-100-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem auto 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-width: 120px;
+        }
+
+        .pi-100-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .pi-100-btn:active {
+            transform: translateY(0);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
         @media (max-width: 768px) {
             .game-container {
                 padding: 2rem;
@@ -663,6 +767,28 @@
                 font-size: 1.3rem;
                 margin-bottom: 1rem;
             }
+
+            .pi-checker {
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .pi-checker h3 {
+                font-size: 1.3rem;
+                margin-bottom: 0.75rem;
+            }
+
+            #piInput {
+                font-size: 1rem;
+                padding: 0.75rem;
+                padding-right: 3rem;
+            }
+
+            .pi-100-btn {
+                font-size: 0.9rem;
+                padding: 0.6rem 1.2rem;
+                min-width: 100px;
+            }
         }
     </style>
 </head>
@@ -706,6 +832,18 @@
             </button>
         </div>
         
+        <!-- Pi Checker (only shown on level 7) -->
+        <div id="piChecker" class="pi-checker" style="display: none;">
+            <h3>🔍 Check your Pi</h3>
+            <div class="pi-input-wrapper">
+                <input type="text" id="piInput" placeholder="Enter digits of Pi (3.14159...)..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <div id="piCounter" class="pi-counter">0</div>
+            </div>
+            <button id="pi100Btn" class="pi-100-btn" onclick="fillPi100()" title="Fill first 100 digits of Pi">
+                π 100
+            </button>
+        </div>
+
         <!-- Level Selector (only shown on level 7) -->
         <div id="levelSelector" class="level-selector" style="display: none;">
             <h3>🎯 Level Selection</h3>

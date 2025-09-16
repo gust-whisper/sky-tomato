@@ -224,11 +224,20 @@ function advanceToLevel(targetLevel) {
             // Add special "cheater" styling for level 8
             if (currentLevel === 8) {
                 gameContainer.classList.add('cheater-level');
-                // On level 8, hide level selector and just show return to level 7 button
+                // On level 8, hide level selector and Pi checker, just show return to level 7 button
                 levelSelector.style.display = 'none';
+                const piChecker = document.getElementById('piChecker');
+                if (piChecker) {
+                    piChecker.style.display = 'none';
+                }
             } else {
                 gameContainer.classList.remove('cheater-level');
-                // Show level selector on level 7
+                // Show Pi checker and level selector on level 7
+                const piChecker = document.getElementById('piChecker');
+                if (piChecker) {
+                    piChecker.style.display = 'block';
+                    initializePiChecker();
+                }
                 levelSelector.style.display = 'block';
                 updateLevelButtons();
             }
@@ -242,8 +251,12 @@ function advanceToLevel(targetLevel) {
             gameContainer.classList.remove('congratulations-level', 'cheater-level');
             document.querySelector('.input-container').style.display = 'block';
             document.querySelector('.button-container').style.display = 'flex';
-            // Hide level selector on other levels
+            // Hide level selector and Pi checker on other levels
             levelSelector.style.display = 'none';
+            const piChecker = document.getElementById('piChecker');
+            if (piChecker) {
+                piChecker.style.display = 'none';
+            }
             // Also hide level 8 challenge
             hideLevel8Challenge();
         }
@@ -586,3 +599,106 @@ function openHint() {
     consecutiveIncorrectCount = 0;
     hintButtonShown = false;
 }
+
+// Pi checker functionality - Extended to 200+ digits for validation
+const PI_DIGITS = "3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819";
+
+function initializePiChecker() {
+    const piInput = document.getElementById('piInput');
+    const piCounter = document.getElementById('piCounter');
+    
+    if (!piInput || !piCounter) return;
+    
+    piInput.addEventListener('input', handlePiInput);
+    piInput.addEventListener('keydown', handlePiKeydown);
+    
+    // Start with empty input
+    piInput.value = '';
+    piCounter.textContent = '0';
+    piInput.classList.remove('error');
+}
+
+function handlePiInput(event) {
+    const input = event.target;
+    const userInput = input.value;
+    const piCounter = document.getElementById('piCounter');
+    
+    // Remove any characters that aren't digits or decimal point
+    const cleanInput = userInput.replace(/[^0-9.]/g, '');
+    
+    // Check if the input matches Pi up to the current length
+    const isValid = PI_DIGITS.startsWith(cleanInput);
+    
+    if (isValid) {
+        // Input is correct so far
+        input.classList.remove('error');
+        input.value = cleanInput;
+        
+        // Count digits (excluding decimal point)
+        const digitCount = cleanInput.replace('.', '').length;
+        piCounter.textContent = digitCount;
+        piCounter.style.color = '#667eea';
+    } else {
+        // Input contains an error
+        input.classList.add('error');
+        
+        // Find the correct prefix and reset to that
+        let correctPrefix = '';
+        for (let i = 0; i < cleanInput.length; i++) {
+            if (PI_DIGITS.startsWith(cleanInput.substring(0, i + 1))) {
+                correctPrefix = cleanInput.substring(0, i + 1);
+            } else {
+                break;
+            }
+        }
+        
+        setTimeout(() => {
+            input.value = correctPrefix;
+            input.classList.remove('error');
+            const digitCount = correctPrefix.replace('.', '').length;
+            piCounter.textContent = digitCount;
+            piCounter.style.color = '#667eea';
+        }, 500);
+    }
+}
+
+function handlePiKeydown(event) {
+    // Allow navigation keys, backspace, delete, etc.
+    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 
+                        'Home', 'End', 'Tab', 'Enter'];
+    
+    if (allowedKeys.includes(event.key)) {
+        return;
+    }
+    
+    // Allow digits and decimal point
+    if (event.key.match(/[0-9.]/)) {
+        return;
+    }
+    
+    // Block all other keys
+    event.preventDefault();
+}
+
+// Function to fill Pi checker with first 100 digits
+function fillPi100() {
+    const piInput = document.getElementById('piInput');
+    const piCounter = document.getElementById('piCounter');
+    
+    if (!piInput || !piCounter) return;
+    
+    // Fill with only the first 100 digits of Pi (including the "3.")
+    const first100Digits = PI_DIGITS.substring(0, 102); // 100 digits + "3."
+    piInput.value = first100Digits;
+    piCounter.textContent = '100';
+    piInput.classList.remove('error');
+    
+    // Focus on the input and move cursor to the end
+    piInput.focus();
+    piInput.setSelectionRange(piInput.value.length, piInput.value.length);
+}
+
+// Initialize Pi checker when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializePiChecker();
+});

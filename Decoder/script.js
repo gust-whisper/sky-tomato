@@ -52,6 +52,18 @@ class DecoderGame {
         document.getElementById('usePunctuation').addEventListener('change', (e) => {
             this.togglePunctuationGrid(e.target.checked);
         });
+
+        // Save cipher functionality
+        document.getElementById('saveCipher').addEventListener('click', () => {
+            this.saveCipher();
+        });
+
+        // Enter key on cipher name input
+        document.getElementById('cipherNameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.saveCipher();
+            }
+        });
     }
 
     showMenu() {
@@ -334,6 +346,9 @@ class DecoderGame {
         
         // Generate cipher grids
         this.generateCipherGrids();
+        
+        // Display saved ciphers
+        this.displaySavedCiphers();
     }
 
     generateCipherGrids() {
@@ -664,9 +679,168 @@ class DecoderGame {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
+
+    // Cipher Save/Load Functionality
+    saveCipher() {
+        const nameInput = document.getElementById('cipherNameInput');
+        const cipherName = nameInput.value.trim();
+        
+        if (!cipherName) {
+            alert('Please enter a name for your cipher!');
+            nameInput.focus();
+            return;
+        }
+
+        // Check if cipher has at least some mappings
+        const hasMappings = Object.values(this.cipherMap).some(value => value && value !== '');
+        if (!hasMappings) {
+            alert('Please create some cipher mappings before saving!');
+            return;
+        }
+
+        // Get saved ciphers from localStorage
+        let savedCiphers = this.getSavedCiphers();
+        
+        // Check if cipher name already exists
+        if (savedCiphers[cipherName]) {
+            if (!confirm(`A cipher named "${cipherName}" already exists. Do you want to overwrite it?`)) {
+                return;
+            }
+        }
+
+        // Save the cipher
+        savedCiphers[cipherName] = {
+            name: cipherName,
+            cipherMap: { ...this.cipherMap },
+            usePunctuation: document.getElementById('usePunctuation').checked,
+            dateCreated: new Date().toISOString()
+        };
+
+        // Store in localStorage
+        localStorage.setItem('decoderSavedCiphers', JSON.stringify(savedCiphers));
+        
+        // Clear the input
+        nameInput.value = '';
+        
+        // Show success message
+        this.showSuccessMessage(`Cipher "${cipherName}" saved successfully!`);
+        
+        // Update the saved ciphers display
+        this.displaySavedCiphers();
+    }
+
+    loadCipher(cipherName) {
+        const savedCiphers = this.getSavedCiphers();
+        const cipher = savedCiphers[cipherName];
+        
+        if (!cipher) {
+            alert('Cipher not found!');
+            return;
+        }
+
+        // Load the cipher map
+        this.cipherMap = { ...cipher.cipherMap };
+        this.updateReverseCipherMap();
+        
+        // Set punctuation checkbox
+        document.getElementById('usePunctuation').checked = cipher.usePunctuation;
+        this.togglePunctuationGrid(cipher.usePunctuation);
+        
+        // Regenerate the cipher grids to show loaded values
+        this.generateCipherGrids();
+        
+        this.showSuccessMessage(`Cipher "${cipherName}" loaded successfully!`);
+    }
+
+    deleteCipher(cipherName) {
+        if (!confirm(`Are you sure you want to delete the cipher "${cipherName}"?`)) {
+            return;
+        }
+
+        const savedCiphers = this.getSavedCiphers();
+        delete savedCiphers[cipherName];
+        
+        localStorage.setItem('decoderSavedCiphers', JSON.stringify(savedCiphers));
+        
+        this.displaySavedCiphers();
+        this.showSuccessMessage(`Cipher "${cipherName}" deleted successfully!`);
+    }
+
+    getSavedCiphers() {
+        try {
+            const saved = localStorage.getItem('decoderSavedCiphers');
+            return saved ? JSON.parse(saved) : {};
+        } catch (e) {
+            console.error('Error loading saved ciphers:', e);
+            return {};
+        }
+    }
+
+    displaySavedCiphers() {
+        const savedCiphers = this.getSavedCiphers();
+        const cipherNames = Object.keys(savedCiphers);
+        const container = document.getElementById('savedCiphersList');
+        const noSavedText = document.getElementById('noSavedCiphers');
+        
+        if (cipherNames.length === 0) {
+            noSavedText.style.display = 'block';
+            container.innerHTML = '';
+            return;
+        }
+
+        noSavedText.style.display = 'none';
+        
+        container.innerHTML = cipherNames.map(name => `
+            <div class="saved-cipher-btn" data-cipher-name="${name}">
+                ${this.escapeHtml(name)}
+                <button class="delete-btn" onclick="event.stopPropagation(); decoderGame.deleteCipher('${this.escapeHtml(name)}')" title="Delete cipher">×</button>
+            </div>
+        `).join('');
+        
+        // Add click listeners to cipher buttons
+        container.querySelectorAll('.saved-cipher-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('delete-btn')) {
+                    const cipherName = btn.dataset.cipherName;
+                    this.loadCipher(cipherName);
+                }
+            });
+        });
+    }
+
+    showSuccessMessage(message) {
+        // Create a temporary success message element
+        const successDiv = document.createElement('div');
+        successDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        `;
+        successDiv.textContent = message;
+        
+        document.body.appendChild(successDiv);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            successDiv.style.transform = 'translateX(400px)';
+            successDiv.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(successDiv);
+            }, 300);
+        }, 3000);
+    }
 }
 
 // Initialize the game when the page loads
+let decoderGame;
 document.addEventListener('DOMContentLoaded', () => {
-    new DecoderGame();
+    decoderGame = new DecoderGame();
 });

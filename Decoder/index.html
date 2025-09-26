@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decoder - Code Analysis Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Decoder</h1>
+            <p class="subtitle">Create and decode secret messages with ciphers</p>
+        </header>
+        
+        <div class="menu-screen" id="menuScreen">
+            <div class="options-grid">
+                <div class="option-card" id="practiceOption">
+                    <div class="option-icon">�</div>
+                    <h2>Create Your Own Cipher</h2>
+                    <p>Enter your secret message and create a custom cipher to encode it</p>
+                    <button class="option-btn">Start Creating</button>
+                </div>
+                
+                <div class="option-card" id="analyzeOption">
+                    <div class="option-icon">�</div>
+                    <h2>Test Your Cipher Skills</h2>
+                    <p>See how well you can decode encrypted messages and crack secret codes</p>
+                    <button class="option-btn">Start Testing</button>
+                </div>
+            </div>
+            
+            <div class="back-btn">
+                <a href="../index.html">← Back to Portfolio</a>
+            </div>
+        </div>
+
+        <div class="game-screen" id="gameScreen" style="display: none;">
+            <div class="game-header">
+                <button id="backToMenu" class="back-button">← Back to Menu</button>
+                <h2 id="gameTitle">Game Mode</h2>
+            </div>
+            
+            <div class="message-input-section" id="messageInputSection">
+                <h3>Enter Your Secret Message</h3>
+                <textarea id="messageInput" placeholder="Enter the secret message you want to encode..." rows="8"></textarea>
+                <div class="input-controls">
+                    <button id="submitMessage" class="submit-btn">Create Cipher</button>
+                </div>
+            </div>
+            
+            <div class="cipher-test-section" id="cipherTestSection" style="display: none;">
+                <h3>Cipher Decoding Challenge</h3>
+                <div class="test-content" id="testContent">
+                    <!-- Cipher tests will be populated here -->
+                </div>
+            </div>
+            
+            <div class="cipher-setup-section" id="cipherSetupSection" style="display: none;">
+                <h3>Create Your Cipher</h3>
+                <div class="cipher-content">
+                    <p class="cipher-instructions">Set up your cipher by mapping each character to letters, numbers, or combinations (like A→B, B→123, C→XY). You can also encode spaces and punctuation marks - leave fields blank to keep them unchanged!</p>
+                    
+                    <div class="letters-section">
+                        <h4>Letters (A-Z)</h4>
+                        <div class="cipher-grid" id="lettersGrid">
+                            <!-- Letter mappings will be generated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="numbers-section">
+                        <h4>Numbers (0-9) - Optional</h4>
+                        <div class="cipher-grid" id="numbersGrid">
+                            <!-- Number mappings will be generated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="punctuation-section">
+                        <div class="punctuation-checkbox">
+                            <input type="checkbox" id="usePunctuation">
+                            <label for="usePunctuation">Include spaces & punctuation (leave blank to keep original)</label>
+                        </div>
+                        <div class="cipher-grid" id="punctuationGrid" style="display: none;">
+                            <!-- Punctuation mappings will be generated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="cipher-controls">
+                        <button id="randomizeCipher" class="cipher-btn">Randomize All</button>
+                        <button id="clearCipher" class="cipher-btn">Clear All</button>
+                        <button id="startPractice" class="cipher-btn primary">Start Practice</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="practice-section" id="practiceSection" style="display: none;">
+                <h3>Decode the Messages</h3>
+                <div class="challenge-content" id="challengeContent">
+                    <div class="practice-instructions">
+                        <p>Use your cipher to decode these three messages. Enter your answer and press Enter to check.</p>
+                    </div>
+                    <div class="sentences-container" id="sentencesContainer">
+                        <!-- Three encoded sentences will be generated here -->
+                    </div>
+                    <div class="practice-controls">
+                        <button id="backToCipher" class="cipher-btn">← Edit Cipher</button>
+                        <button id="newSentences" class="cipher-btn">New Sentences</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

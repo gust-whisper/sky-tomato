@@ -8,11 +8,13 @@ class DecoderGame {
         this.numbers = '0123456789'.split('');
         this.punctuation = [' ', '.', ',', '!', '?', ';', ':', "'", '"', '-', '(', ')', '[', ']', '{', '}', '@', '#', '$', '%', '^', '&', '*', '+', '=', '<', '>', '/', '\\', '|', '`', '~'];
         this.presetCiphers = this.createPresetCiphers();
+        this.totalPoints = this.loadPoints();
         this.init();
     }
 
     init() {
         this.bindEvents();
+        // Don't update points display here since the element doesn't exist yet
     }
 
     bindEvents() {
@@ -86,6 +88,9 @@ class DecoderGame {
         document.getElementById('gameScreen').style.display = 'block';
         document.getElementById('gameTitle').textContent = 'Create Your Cipher';
         
+        // Update points display
+        this.updatePointsDisplay();
+        
         // Show cipher setup section immediately
         this.hideAllSections();
         this.showCipherSetup();
@@ -96,6 +101,9 @@ class DecoderGame {
         document.getElementById('menuScreen').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'block';
         document.getElementById('gameTitle').textContent = 'Cipher Decoding Challenge';
+        
+        // Update points display
+        this.updatePointsDisplay();
         
         // Show cipher test section
         this.hideAllSections();
@@ -629,17 +637,41 @@ class DecoderGame {
         const feedback = document.getElementById(`feedback-${index}`);
         const userAnswer = input.value.trim().toUpperCase();
         const correctAnswer = this.currentSentences[index].original.toUpperCase();
-        const button = document.querySelector(`[data-index="${index}"]`);
+        const button = document.querySelector(`.check-answer-btn[data-index="${index}"]`);
 
-        if (userAnswer === correctAnswer) {
-            // Correct answer
+        // Check if button exists to prevent errors
+        if (!button) {
+            console.error(`Button not found for index ${index}`);
+            return;
+        }
+
+        // Define cheat codes for each sentence index
+        const cheatCodes = [
+            "DEATH OF THE SUN",  // Cheat for sentence 0
+            "DAN DA DAN",        // Cheat for sentence 1  
+            "I LOVE FAWN"        // Cheat for sentence 2
+        ];
+
+        // Check if answer is correct (either the real answer or the cheat code)
+        const isCheatCode = cheatCodes[index] && userAnswer === cheatCodes[index];
+        const isCorrectAnswer = userAnswer === correctAnswer;
+
+        if (isCorrectAnswer || isCheatCode) {
+            // Correct answer (or cheat code)
             this.currentSentences[index].solved = true;
             input.disabled = true;
-            input.value = this.currentSentences[index].original;
+            
+            // Show the actual answer (not the cheat code if cheat was used)
+            if (isCheatCode) {
+                input.value = this.currentSentences[index].original;
+                feedback.innerHTML = '<span style="color: #4CAF50; font-weight: bold;">✓ Correct! Well done!</span> <span style="color: #FF6B35; font-size: 0.9em;">🎮</span>';
+            } else {
+                input.value = this.currentSentences[index].original;
+                feedback.innerHTML = '<span style="color: #4CAF50; font-weight: bold;">✓ Correct! Well done!</span>';
+            }
+            
             button.textContent = '✓ Correct';
             button.disabled = true;
-            
-            feedback.innerHTML = '<span style="color: #4CAF50; font-weight: bold;">✓ Correct! Well done!</span>';
             
             // Add solved styling
             const challengeDiv = input.closest('.sentence-challenge');
@@ -647,8 +679,12 @@ class DecoderGame {
 
             // Check if all sentences are solved
             if (this.currentSentences.every(s => s.solved)) {
+                // Award 3 points for solving all three sentences
+                this.awardPoints(3);
+                
+                // Show small notification
                 setTimeout(() => {
-                    alert('🎉 Congratulations! You\'ve successfully decoded all three messages!');
+                    this.showPointsNotification(3);
                 }, 500);
             }
         } else {
@@ -664,12 +700,6 @@ class DecoderGame {
             }, 500);
         }
     }
-
-
-
-
-
-
 
     escapeHtml(unsafe) {
         return unsafe
@@ -836,6 +866,154 @@ class DecoderGame {
                 document.body.removeChild(successDiv);
             }, 300);
         }, 3000);
+    }
+
+    showPointsSuccessMessage(message, pointsEarned, totalPoints) {
+        // Create a special success message element for points
+        const successDiv = document.createElement('div');
+        successDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 2rem 3rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            z-index: 1000;
+            font-weight: 600;
+            text-align: center;
+            min-width: 300px;
+            border: 3px solid #fff;
+        `;
+        
+        successDiv.innerHTML = `
+            <div style="font-size: 1.2rem; margin-bottom: 1rem;">
+                ${message}
+            </div>
+            <div style="font-size: 2rem; margin: 1rem 0; color: #FFD700;">
+                +${pointsEarned} Points! ⭐
+            </div>
+            <div style="font-size: 1rem; opacity: 0.9;">
+                Total Points: ${totalPoints}
+            </div>
+            <button id="pointsOkBtn" style="
+                margin-top: 1rem;
+                background: rgba(255,255,255,0.2);
+                color: white;
+                border: 2px solid white;
+                padding: 0.5rem 1.5rem;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                Awesome! ✨
+            </button>
+        `;
+        
+        // Add backdrop
+        const backdrop = document.createElement('div');
+        backdrop.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            backdrop-filter: blur(3px);
+        `;
+        
+        document.body.appendChild(backdrop);
+        document.body.appendChild(successDiv);
+        
+        // Handle close button
+        const closeBtn = successDiv.querySelector('#pointsOkBtn');
+        const closeModal = () => {
+            successDiv.style.transform = 'translate(-50%, -50%) scale(0.8)';
+            successDiv.style.opacity = '0';
+            backdrop.style.opacity = '0';
+            setTimeout(() => {
+                if (document.body.contains(successDiv)) document.body.removeChild(successDiv);
+                if (document.body.contains(backdrop)) document.body.removeChild(backdrop);
+            }, 300);
+        };
+        
+        closeBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+        
+        // Auto close after 10 seconds
+        setTimeout(closeModal, 10000);
+    }
+
+    updatePointsDisplay() {
+        const pointsElement = document.getElementById('pointsValue');
+        if (pointsElement) {
+            pointsElement.textContent = this.totalPoints;
+        }
+    }
+
+    showPointsNotification(pointsEarned) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'points-notification';
+        notification.innerHTML = `
+            <div class="notification-icon">⭐</div>
+            <div class="notification-text">
+                <div class="notification-title">+${pointsEarned} Points!</div>
+                <div class="notification-subtitle">Total: ${this.totalPoints}</div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Show notification with animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        // Hide notification after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 500);
+        }, 3000);
+    }
+
+    // Points Management System
+    loadPoints() {
+        try {
+            const savedPoints = localStorage.getItem('decoderGamePoints');
+            return savedPoints ? parseInt(savedPoints, 10) : 0;
+        } catch (e) {
+            console.error('Error loading points:', e);
+            return 0;
+        }
+    }
+
+    savePoints() {
+        try {
+            localStorage.setItem('decoderGamePoints', this.totalPoints.toString());
+        } catch (e) {
+            console.error('Error saving points:', e);
+        }
+    }
+
+    awardPoints(points) {
+        this.totalPoints += points;
+        this.savePoints();
+        this.updatePointsDisplay(); // Update display when points are awarded
+        return this.totalPoints;
+    }
+
+    getPoints() {
+        return this.totalPoints;
     }
 }
 

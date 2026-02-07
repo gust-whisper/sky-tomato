@@ -274,10 +274,7 @@ body::before {
 }
 
 .deck-label {
-    font-size: 0.95rem;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    opacity: 0.75;
+    display: none;
 }
 
 .deck-stack {

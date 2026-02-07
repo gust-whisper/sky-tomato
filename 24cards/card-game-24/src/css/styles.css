@@ -51,6 +51,14 @@ body.safe-mode::before {
     background: url("../../../Pokertable.webp") center/cover no-repeat;
 }
 
+.title-screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 0;
+}
+
 .title-hero {
     display: flex;
     flex-direction: column;
@@ -61,6 +69,7 @@ body.safe-mode::before {
     border-radius: 32px;
     background: linear-gradient(135deg, rgba(10, 35, 20, 0.92), rgba(15, 60, 34, 0.88));
     box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
+    z-index: 1;
 }
 
 .title-badge {
@@ -140,9 +149,6 @@ body.safe-mode .card-back {
     background: rgba(255, 255, 255, 0.18);
 }
 
-.title-piles {
-    display: none;
-}
 
 .card-pile {
     position: absolute;

@@ -86,7 +86,7 @@ class DecoderGame {
         this.currentMode = 'create';
         document.getElementById('menuScreen').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'block';
-        document.getElementById('gameTitle').textContent = 'Create Your Cipher';
+        document.getElementById('gameTitle').textContent = 'Practice Your Cipher';
         
         // Update points display
         this.updatePointsDisplay();

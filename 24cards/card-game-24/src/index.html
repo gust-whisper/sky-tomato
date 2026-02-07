@@ -63,6 +63,7 @@
                 <button class="ghost-button" data-action="back">Back</button>
             </header>
             <div class="table-area">
+                <div class="deal-area" aria-hidden="true"></div>
                 <div class="player-name-tag left">
                     <span class="player-name" data-player="1">Player One</span>
                     <button class="edit-button" data-edit="1" aria-label="Edit Player One">✎</button>
@@ -71,7 +72,7 @@
                     <span class="player-name" data-player="2">Player Two</span>
                     <button class="edit-button" data-edit="2" aria-label="Edit Player Two">✎</button>
                 </div>
-                <div class="deck-position left">
+                <div class="deck-position left" data-deck="left">
                     <div class="deck-stack">
                         <div class="card-back"></div>
                         <div class="card-back"></div>
@@ -81,9 +82,9 @@
                 </div>
                 <div class="table-center">
                     <div class="empty-table">Empty table — cards face down.</div>
-                    <button class="primary-button play-button" type="button">Play</button>
+                    <button id="play-button" class="primary-button play-button" type="button">Play</button>
                 </div>
-                <div class="deck-position right">
+                <div class="deck-position right" data-deck="right">
                     <div class="deck-stack">
                         <div class="card-back"></div>
                         <div class="card-back"></div>

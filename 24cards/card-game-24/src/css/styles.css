@@ -242,6 +242,13 @@ body.safe-mode .card-back {
     position: relative;
 }
 
+.deal-area {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
 .player-name-tag {
     position: absolute;
     top: 18px;
@@ -321,10 +328,61 @@ body.safe-mode .card-back {
     background: rgba(4, 20, 12, 0.4);
     min-height: 240px;
     text-align: center;
+    position: relative;
+    z-index: 2;
 }
 
 .play-button {
     margin-top: 20px;
+}
+
+.deal-card {
+    position: absolute;
+    width: 130px;
+    height: 182px;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease, left 0.6s ease, top 0.6s ease;
+}
+
+.deal-card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease;
+}
+
+.card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    backface-visibility: hidden;
+    border: 2px solid #f8f1e6;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 1.6rem;
+}
+
+.card-face.front {
+    background: #f8f1e6;
+    color: #1d1a16;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.card-face.front.red {
+    color: #b1122a;
+}
+
+.card-face.back {
+    transform: rotateY(180deg);
+    background: linear-gradient(145deg, #b6122b 0%, #8c0c22 100%);
+    color: #f8f1e6;
 }
 
 @media (prefers-reduced-motion: reduce) {

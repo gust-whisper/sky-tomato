@@ -68,7 +68,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const front = document.createElement('div');
         front.className = `card-face front ${card.suit.color === 'red' ? 'red' : ''}`.trim();
-        front.textContent = `${card.rank}${card.suit.symbol}`;
+        const cornerTop = document.createElement('div');
+        cornerTop.className = 'card-corner top';
+        cornerTop.innerHTML = `<span class="card-rank">${card.rank}</span><span class="card-suit">${card.suit.symbol}</span>`;
+
+        const cornerBottom = document.createElement('div');
+        cornerBottom.className = 'card-corner bottom';
+        cornerBottom.innerHTML = `<span class="card-rank">${card.rank}</span><span class="card-suit">${card.suit.symbol}</span>`;
+
+        const pip = document.createElement('div');
+        pip.className = 'card-pip';
+        pip.textContent = card.suit.symbol;
+
+        front.appendChild(cornerTop);
+        front.appendChild(cornerBottom);
+        front.appendChild(pip);
 
         const back = document.createElement('div');
         back.className = 'card-face back';

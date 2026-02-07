@@ -373,8 +373,10 @@ body.safe-mode .card-back {
 .card-face.front {
     background: #f8f1e6;
     color: #1d1a16;
+    font-family: "Times New Roman", "Georgia", serif;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
+    box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.05);
 }
 
 .card-face.front.red {
@@ -385,6 +387,40 @@ body.safe-mode .card-back {
     transform: rotateY(180deg);
     background: linear-gradient(145deg, #b6122b 0%, #8c0c22 100%);
     color: #f8f1e6;
+}
+
+.card-corner {
+    position: absolute;
+    display: grid;
+    gap: 4px;
+    font-size: 0.95rem;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.card-corner.top {
+    top: 10px;
+    left: 10px;
+}
+
+.card-corner.bottom {
+    bottom: 10px;
+    right: 10px;
+    transform: rotate(180deg);
+}
+
+.card-rank {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.card-suit {
+    font-size: 1rem;
+}
+
+.card-pip {
+    font-size: 3.2rem;
+    opacity: 0.95;
 }
 
 @media (prefers-reduced-motion: reduce) {

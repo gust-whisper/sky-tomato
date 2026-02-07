@@ -11,12 +11,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const editButtons = document.querySelectorAll('[data-edit]');
 
     const showScreen = (screenKey) => {
-        Object.values(screens).forEach((screen) => screen.classList.remove('screen-active'));
-        screens[screenKey].classList.add('screen-active');
+        Object.values(screens)
+            .filter(Boolean)
+            .forEach((screen) => screen.classList.remove('screen-active'));
+        if (screens[screenKey]) {
+            screens[screenKey].classList.add('screen-active');
+        }
     };
 
-    soloButton.addEventListener('click', () => showScreen('solo'));
-    multiplayerButton.addEventListener('click', () => showScreen('multiplayer'));
+    if (soloButton) {
+        soloButton.addEventListener('click', () => showScreen('solo'));
+    }
+
+    if (multiplayerButton) {
+        multiplayerButton.addEventListener('click', () => showScreen('multiplayer'));
+    }
+
     backButtons.forEach((button) => button.addEventListener('click', () => showScreen('title')));
 
     editButtons.forEach((button) => {

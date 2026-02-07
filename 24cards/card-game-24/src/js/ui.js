@@ -22,6 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (screens[screenKey]) {
             screens[screenKey].classList.add('screen-active');
         }
+        if (screenKey === 'title') {
+            document.body.classList.add('title-active');
+        } else {
+            document.body.classList.remove('title-active');
+        }
     };
 
     if (soloButton) {
@@ -48,4 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    showScreen('title');
 });

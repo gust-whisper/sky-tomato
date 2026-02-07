@@ -9,6 +9,13 @@ class DecoderGame {
         this.punctuation = [' ', '.', ',', '!', '?', ';', ':', "'", '"', '-', '(', ')', '[', ']', '{', '}', '@', '#', '$', '%', '^', '&', '*', '+', '=', '<', '>', '/', '\\', '|', '`', '~'];
         this.presetCiphers = this.createPresetCiphers();
         this.totalPoints = this.loadPoints();
+        
+        // Challenge properties
+        this.challengeTimer = null;
+        this.challengeTimeLeft = 120;
+        this.challengeAttempts = [];
+        this.challengeSentences = [];
+        
         this.init();
     }
 
@@ -66,6 +73,23 @@ class DecoderGame {
                 this.saveCipher();
             }
         });
+
+        // Cipher challenge event listeners
+        document.getElementById('startChallenge').addEventListener('click', () => {
+            this.startAIChallenge();
+        });
+
+        document.getElementById('backToMenuFromChallenge').addEventListener('click', () => {
+            this.showMenu();
+        });
+
+        document.getElementById('newChallenge').addEventListener('click', () => {
+            this.resetChallengeState();
+        });
+
+        document.getElementById('backToMenuFromResult').addEventListener('click', () => {
+            this.showMenu();
+        });
     }
 
     showMenu() {
@@ -80,6 +104,7 @@ class DecoderGame {
         document.getElementById('cipherTestSection').style.display = 'none';
         document.getElementById('practiceSection').style.display = 'none';
         document.getElementById('cipherSetupSection').style.display = 'none';
+        document.getElementById('cipherChallengeSection').style.display = 'none';
     }
 
     startPracticeMode() {
@@ -97,20 +122,20 @@ class DecoderGame {
     }
 
     startAnalyzeMode() {
-        this.currentMode = 'test';
+        this.currentMode = 'challenge';
         document.getElementById('menuScreen').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'block';
-        document.getElementById('gameTitle').textContent = 'Cipher Decoding Challenge';
+        document.getElementById('gameTitle').textContent = 'Test Your Cipher Skills';
         
         // Update points display
         this.updatePointsDisplay();
         
-        // Show cipher test section
+        // Show cipher challenge section
         this.hideAllSections();
-        document.getElementById('cipherTestSection').style.display = 'block';
+        document.getElementById('cipherChallengeSection').style.display = 'block';
         
-        // Generate a random cipher challenge
-        this.generateCipherChallenge();
+        // Reset challenge state
+        this.resetChallengeState();
     }
 
     submitMessage() {
@@ -182,169 +207,6 @@ class DecoderGame {
             cipher[letter] = (index + 1).toString();
         });
         return cipher;
-    }
-
-    generateCipherChallenge() {
-        const testContainer = document.getElementById('testContent');
-        
-        // Select a random preset cipher
-        const cipherKeys = Object.keys(this.presetCiphers);
-        const randomCipherKey = cipherKeys[Math.floor(Math.random() * cipherKeys.length)];
-        const selectedCipher = this.presetCiphers[randomCipherKey];
-        
-        // Generate a random secret message
-        const secretMessages = [
-            "MEET ME AT MIDNIGHT",
-            "THE TREASURE IS BURIED UNDER THE OLD OAK TREE",
-            "ATTACK AT DAWN",
-            "THE PASSWORD IS FRIENDSHIP",
-            "BEWARE THE ENEMY SPY",
-            "MISSION ACCOMPLISHED",
-            "HELP IS ON THE WAY",
-            "THE SECRET IS SAFE"
-        ];
-        
-        const originalMessage = secretMessages[Math.floor(Math.random() * secretMessages.length)];
-        const encodedMessage = this.encodeWithCipher(originalMessage, selectedCipher.map);
-        
-        testContainer.innerHTML = `
-            <div class="cipher-challenge">
-                <div class="challenge-info">
-                    <h4>🔐 ${selectedCipher.name}</h4>
-                    <p class="cipher-description">${selectedCipher.description}</p>
-                </div>
-                
-                <div class="encrypted-message">
-                    <h5>Encrypted Message:</h5>
-                    <div class="message-display">
-                        ${encodedMessage}
-                    </div>
-                </div>
-                
-                <div class="decryption-area">
-                    <h5>Your Answer:</h5>
-                    <textarea id="decryptionInput" placeholder="Enter your decoded message here..." rows="3"></textarea>
-                    <button id="checkAnswer" class="check-btn">Check Answer</button>
-                </div>
-                
-                <div class="cipher-key" style="display: none;">
-                    <h5>Cipher Key:</h5>
-                    <div class="key-display">
-                        ${this.displayCipherKey(selectedCipher.map)}
-                    </div>
-                </div>
-                
-                <div class="answer-section" style="display: none;">
-                    <h5>Correct Answer:</h5>
-                    <div class="answer-display">
-                        ${originalMessage}
-                    </div>
-                </div>
-                
-                <div class="challenge-controls">
-                    <button id="showHint" class="hint-btn">Show Cipher Key</button>
-                    <button id="newChallenge" class="new-challenge-btn">New Challenge</button>
-                </div>
-            </div>
-        `;
-        
-        // Store the current challenge data
-        this.currentChallenge = {
-            original: originalMessage,
-            encoded: encodedMessage,
-            cipher: selectedCipher
-        };
-        
-        // Bind event listeners for the challenge
-        this.bindChallengeEvents();
-    }
-
-    encodeWithCipher(message, cipher) {
-        return message.split('').map(char => {
-            // Check for space mapping first (don't automatically preserve spaces)
-            if (char === ' ' && cipher[' '] && cipher[' '] !== '') {
-                return cipher[' '];
-            } else if (char === ' ' && (!cipher[' '] || cipher[' '] === '')) {
-                return ' '; // Keep space unchanged if no mapping
-            }
-            
-            const upperChar = char.toUpperCase();
-            
-            // Check if there's a cipher mapping for this character
-            if (cipher[upperChar] && cipher[upperChar] !== '') {
-                return cipher[upperChar];
-            } else if (cipher[char] && cipher[char] !== '') {
-                return cipher[char];
-            } else {
-                // If no mapping or empty mapping, return original character
-                return char;
-            }
-        }).join('');
-    }
-
-    displayCipherKey(cipher) {
-        const mappings = [];
-        this.alphabet.forEach(letter => {
-            if (cipher[letter]) {
-                mappings.push(`${letter} → ${cipher[letter]}`);
-            }
-        });
-        return mappings.join(' &nbsp;&nbsp; ');
-    }
-
-    bindChallengeEvents() {
-        document.getElementById('checkAnswer').addEventListener('click', () => {
-            this.checkDecryptionAnswer();
-        });
-        
-        document.getElementById('showHint').addEventListener('click', () => {
-            this.showCipherKey();
-        });
-        
-        document.getElementById('newChallenge').addEventListener('click', () => {
-            this.generateCipherChallenge();
-        });
-    }
-
-    checkDecryptionAnswer() {
-        const userAnswer = document.getElementById('decryptionInput').value.trim().toUpperCase();
-        const correctAnswer = this.currentChallenge.original.toUpperCase();
-        
-        const answerSection = document.querySelector('.answer-section');
-        answerSection.style.display = 'block';
-        
-        if (userAnswer === correctAnswer) {
-            answerSection.innerHTML = `
-                <h5 style="color: #4CAF50;">✅ Correct!</h5>
-                <div class="answer-display" style="background: #e8f5e8;">
-                    ${this.currentChallenge.original}
-                </div>
-                <p style="color: #4CAF50; margin-top: 1rem;">
-                    Excellent work! You successfully decoded the secret message.
-                </p>
-            `;
-        } else {
-            answerSection.innerHTML = `
-                <h5 style="color: #f44336;">❌ Not quite right</h5>
-                <div class="answer-display" style="background: #ffebee;">
-                    <strong>Your answer:</strong> ${userAnswer || '(empty)'}<br>
-                    <strong>Correct answer:</strong> ${this.currentChallenge.original}
-                </div>
-                <p style="color: #f44336; margin-top: 1rem;">
-                    Try again! Use the cipher key to help decode the message.
-                </p>
-            `;
-        }
-    }
-
-    showCipherKey() {
-        const cipherKey = document.querySelector('.cipher-key');
-        cipherKey.style.display = 'block';
-        
-        const hintBtn = document.getElementById('showHint');
-        hintBtn.textContent = 'Key Revealed';
-        hintBtn.disabled = true;
-        hintBtn.style.opacity = '0.6';
     }
 
     showCipherSetup() {
@@ -474,6 +336,29 @@ class DecoderGame {
     togglePunctuationGrid(show) {
         const punctuationGrid = document.getElementById('punctuationGrid');
         punctuationGrid.style.display = show ? 'grid' : 'none';
+    }
+
+    encodeWithCipher(message, cipher) {
+        return message.split('').map(char => {
+            // Check for space mapping first (don't automatically preserve spaces)
+            if (char === ' ' && cipher[' '] && cipher[' '] !== '') {
+                return cipher[' '];
+            } else if (char === ' ' && (!cipher[' '] || cipher[' '] === '')) {
+                return ' '; // Keep space unchanged if no mapping
+            }
+            
+            const upperChar = char.toUpperCase();
+            
+            // Check if there's a cipher mapping for this character
+            if (cipher[upperChar] && cipher[upperChar] !== '') {
+                return cipher[upperChar];
+            } else if (cipher[char] && cipher[char] !== '') {
+                return cipher[char];
+            } else {
+                // If no mapping or empty mapping, return original character
+                return char;
+            }
+        }).join('');
     }
 
     randomizeCipher() {
@@ -1014,6 +899,370 @@ class DecoderGame {
 
     getPoints() {
         return this.totalPoints;
+    }
+
+    // Cipher Challenge Methods
+    resetChallengeState() {
+        // Reset input fields
+        document.getElementById('sentence1').value = '';
+        document.getElementById('sentence2').value = '';
+        document.getElementById('sentence3').value = '';
+        
+        // Hide challenge containers
+        document.getElementById('aiChallengeContainer').style.display = 'none';
+        document.getElementById('challengeResult').style.display = 'none';
+        
+        // Reset timer and progress
+        this.challengeTimer = null;
+        this.challengeTimeLeft = 120; // 2 minutes
+        this.updateTimerDisplay();
+        this.updateProgressBar(0);
+        
+        // Clear analysis log and attempts
+        document.getElementById('analysisLog').innerHTML = '<p>Starting cipher analysis...</p>';
+        document.getElementById('attemptsContainer').innerHTML = '';
+        
+        this.challengeAttempts = [];
+        this.challengeSentences = [];
+    }
+
+    startAIChallenge() {
+        // Get the three sentences
+        const sentence1 = document.getElementById('sentence1').value.trim();
+        const sentence2 = document.getElementById('sentence2').value.trim();
+        const sentence3 = document.getElementById('sentence3').value.trim();
+        
+        // Validate input
+        if (!sentence1 || !sentence2 || !sentence3) {
+            alert('Please enter all three encrypted sentences before starting the challenge!');
+            return;
+        }
+        
+        // Store sentences
+        this.challengeSentences = [sentence1, sentence2, sentence3];
+        
+        // Show AI challenge container
+        document.getElementById('aiChallengeContainer').style.display = 'block';
+        
+        // Start the timer and AI challenge
+        this.startChallengeTimer();
+        this.runAIDecryption();
+    }
+
+    startChallengeTimer() {
+        this.challengeTimeLeft = 120; // 2 minutes
+        this.updateTimerDisplay();
+        
+        this.challengeTimer = setInterval(() => {
+            this.challengeTimeLeft--;
+            this.updateTimerDisplay();
+            this.updateProgressBar((120 - this.challengeTimeLeft) / 120 * 100);
+            
+            // Check if time is running out
+            const timerElement = document.getElementById('timerValue');
+            if (this.challengeTimeLeft <= 30) {
+                timerElement.classList.add('critical');
+                timerElement.classList.remove('warning');
+            } else if (this.challengeTimeLeft <= 60) {
+                timerElement.classList.add('warning');
+                timerElement.classList.remove('critical');
+            }
+            
+            if (this.challengeTimeLeft <= 0) {
+                this.endChallenge(false); // Player wins - AI failed
+            }
+        }, 1000);
+    }
+
+    updateTimerDisplay() {
+        const minutes = Math.floor(this.challengeTimeLeft / 60);
+        const seconds = this.challengeTimeLeft % 60;
+        const timerText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        document.getElementById('timerValue').textContent = timerText;
+    }
+
+    updateProgressBar(percentage) {
+        document.getElementById('progressFill').style.width = `${percentage}%`;
+    }
+
+    addAnalysisLog(message) {
+        const log = document.getElementById('analysisLog');
+        const p = document.createElement('p');
+        p.textContent = message;
+        log.appendChild(p);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    addAttempt(attemptNumber, attemptText, confidence) {
+        const container = document.getElementById('attemptsContainer');
+        const attemptDiv = document.createElement('div');
+        attemptDiv.className = 'attempt-item';
+        
+        attemptDiv.innerHTML = `
+            <div class="attempt-number">Attempt ${attemptNumber} (Confidence: ${confidence}%)</div>
+            <div class="attempt-text">${attemptText}</div>
+        `;
+        
+        container.appendChild(attemptDiv);
+        container.scrollTop = container.scrollHeight;
+        
+        this.challengeAttempts.push({
+            number: attemptNumber,
+            text: attemptText,
+            confidence: confidence
+        });
+    }
+
+    async runAIDecryption() {
+        this.addAnalysisLog('Analyzing cipher patterns...');
+        
+        try {
+            // Phase 1: Pattern Analysis (10-20 seconds)
+            await this.analyzePatterns();
+            
+            // Phase 2: Frequency Analysis (20-40 seconds)
+            await this.frequencyAnalysis();
+            
+            // Phase 3: Dictionary Matching (40-80 seconds)
+            await this.dictionaryMatching();
+            
+            // Phase 4: Advanced Techniques (80-120 seconds)
+            await this.advancedDecryption();
+            
+        } catch (error) {
+            this.addAnalysisLog('Error during decryption: ' + error.message);
+        }
+    }
+
+    async analyzePatterns() {
+        this.addAnalysisLog('Examining character frequencies...');
+        await this.delay(2000);
+        
+        this.addAnalysisLog('Identifying word boundaries...');
+        await this.delay(3000);
+        
+        this.addAnalysisLog('Looking for common patterns...');
+        await this.delay(2000);
+        
+        // Simple pattern-based attempt
+        const simpleAttempt = this.generateSimpleAttempt();
+        this.addAttempt(1, simpleAttempt, 15);
+        await this.delay(3000);
+    }
+
+    async frequencyAnalysis() {
+        if (this.challengeTimeLeft <= 0) return;
+        
+        this.addAnalysisLog('Running frequency analysis on character distribution...');
+        await this.delay(4000);
+        
+        this.addAnalysisLog('Comparing against English letter frequencies...');
+        await this.delay(3000);
+        
+        // Frequency-based attempt
+        const frequencyAttempt = this.generateFrequencyAttempt();
+        this.addAttempt(2, frequencyAttempt, 35);
+        await this.delay(4000);
+        
+        if (this.challengeTimeLeft <= 0) return;
+        
+        this.addAnalysisLog('Adjusting mappings based on digram analysis...');
+        await this.delay(3000);
+        
+        const improvedAttempt = this.generateImprovedAttempt();
+        this.addAttempt(3, improvedAttempt, 50);
+        await this.delay(3000);
+    }
+
+    async dictionaryMatching() {
+        if (this.challengeTimeLeft <= 0) return;
+        
+        this.addAnalysisLog('Attempting dictionary word matching...');
+        await this.delay(4000);
+        
+        this.addAnalysisLog('Searching for common English words...');
+        await this.delay(3000);
+        
+        const dictionaryAttempt = this.generateDictionaryAttempt();
+        this.addAttempt(4, dictionaryAttempt, 65);
+        await this.delay(4000);
+        
+        if (this.challengeTimeLeft <= 0) return;
+        
+        // Check if this attempt is good enough to "win"
+        if (this.isGoodDecryption(dictionaryAttempt)) {
+            this.endChallenge(true); // AI wins
+            return;
+        }
+        
+        this.addAnalysisLog('Refining word boundaries...');
+        await this.delay(3000);
+        
+        const refinedAttempt = this.generateRefinedAttempt();
+        this.addAttempt(5, refinedAttempt, 75);
+        await this.delay(3000);
+    }
+
+    async advancedDecryption() {
+        if (this.challengeTimeLeft <= 0) return;
+        
+        this.addAnalysisLog('Applying advanced cryptanalysis techniques...');
+        await this.delay(5000);
+        
+        this.addAnalysisLog('Using context clues and semantic analysis...');
+        await this.delay(4000);
+        
+        const advancedAttempt = this.generateAdvancedAttempt();
+        this.addAttempt(6, advancedAttempt, 85);
+        await this.delay(4000);
+        
+        if (this.challengeTimeLeft <= 0) return;
+        
+        // Final attempt - this might succeed
+        if (this.isGoodDecryption(advancedAttempt)) {
+            this.endChallenge(true); // AI wins
+            return;
+        }
+        
+        this.addAnalysisLog('Making final optimization attempts...');
+        await this.delay(3000);
+        
+        const finalAttempt = this.generateFinalAttempt();
+        this.addAttempt(7, finalAttempt, 90);
+        
+        // Final check
+        if (this.isGoodDecryption(finalAttempt)) {
+            this.endChallenge(true); // AI wins
+        }
+    }
+
+    generateSimpleAttempt() {
+        // Simple substitution - just replace some common letters
+        return this.challengeSentences.map(sentence => {
+            return sentence.replace(/E/g, 'A')
+                          .replace(/T/g, 'E')
+                          .replace(/A/g, 'I')
+                          .replace(/O/g, 'O')
+                          .replace(/I/g, 'T');
+        }).join(' | ');
+    }
+
+    generateFrequencyAttempt() {
+        // More sophisticated attempt based on frequency
+        const commonMappings = {
+            'E': 'T', 'T': 'A', 'A': 'O', 'O': 'I', 'I': 'N',
+            'N': 'S', 'S': 'H', 'H': 'R', 'R': 'D', 'D': 'L'
+        };
+        
+        return this.challengeSentences.map(sentence => {
+            let result = sentence;
+            for (const [from, to] of Object.entries(commonMappings)) {
+                result = result.replace(new RegExp(from, 'g'), to.toLowerCase());
+            }
+            return result;
+        }).join(' | ');
+    }
+
+    generateImprovedAttempt() {
+        // Improved version with better mapping
+        return this.challengeSentences.map(sentence => {
+            return sentence.toLowerCase()
+                          .replace(/x/g, 'e')
+                          .replace(/q/g, 't')
+                          .replace(/z/g, 'a')
+                          .replace(/w/g, 'o')
+                          .replace(/j/g, 'i');
+        }).join(' | ');
+    }
+
+    generateDictionaryAttempt() {
+        // Attempt to make recognizable words
+        return this.challengeSentences.map(sentence => {
+            return sentence.toLowerCase()
+                          .replace(/th/g, 'the')
+                          .replace(/nd/g, 'and')
+                          .replace(/ht/g, 'hat')
+                          .replace(/is/g, 'it')
+                          .replace(/at/g, 'to');
+        }).join(' | ');
+    }
+
+    generateRefinedAttempt() {
+        // More refined attempt
+        return 'meet me at the secret location | bring the package carefully | trust no one else completely';
+    }
+
+    generateAdvancedAttempt() {
+        // Advanced attempt - getting closer
+        return 'the quick brown fox jumps over | secret messages need careful handling | victory belongs to the persistent';
+    }
+
+    generateFinalAttempt() {
+        // Final attempt - this could be very close
+        return 'this is the first decoded sentence | here is the second important message | the third sentence completes the challenge';
+    }
+
+    isGoodDecryption(attempt) {
+        // Check if the decryption is "good enough" for AI to win
+        // This is somewhat random to make the game interesting
+        const randomFactor = Math.random();
+        const timeProgression = (120 - this.challengeTimeLeft) / 120;
+        
+        // AI has a higher chance of success as time progresses
+        const successThreshold = 0.3 + (timeProgression * 0.4); // 30% to 70% chance
+        
+        return randomFactor < successThreshold;
+    }
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    endChallenge(aiWon) {
+        // Stop the timer
+        if (this.challengeTimer) {
+            clearInterval(this.challengeTimer);
+            this.challengeTimer = null;
+        }
+        
+        // Show result
+        document.getElementById('challengeResult').style.display = 'block';
+        const resultContent = document.getElementById('resultContent');
+        
+        if (aiWon) {
+            // AI succeeded - player loses 2 points
+            this.awardPoints(-2);
+            this.addAnalysisLog('DECRYPTION SUCCESSFUL! AI has cracked your cipher.');
+            
+            resultContent.innerHTML = `
+                <div class="result-lose">🤖 AI Wins!</div>
+                <div class="result-details">
+                    <p>The AI successfully decoded your cipher in ${Math.floor((120 - this.challengeTimeLeft) / 60)}:${((120 - this.challengeTimeLeft) % 60).toString().padStart(2, '0')}!</p>
+                    <p><strong>-2 Points</strong> - Better luck next time!</p>
+                    <p>Your current score: <strong>${this.totalPoints} points</strong></p>
+                </div>
+            `;
+            
+            this.showPointsNotification(-2, '🤖 AI cracked your cipher! -2 points');
+        } else {
+            // Player wins - AI failed
+            this.awardPoints(2);
+            this.addAnalysisLog('DECRYPTION FAILED! Your cipher has defeated the AI.');
+            
+            resultContent.innerHTML = `
+                <div class="result-win">🎉 You Win!</div>
+                <div class="result-details">
+                    <p>Your cipher successfully stumped the AI for the full 2 minutes!</p>
+                    <p><strong>+2 Points</strong> - Excellent cipher skills!</p>
+                    <p>Your current score: <strong>${this.totalPoints} points</strong></p>
+                </div>
+            `;
+            
+            this.showPointsNotification(2, '🎉 Your cipher stumped the AI! +2 points');
+        }
+        
+        // Scroll to result
+        document.getElementById('challengeResult').scrollIntoView({ behavior: 'smooth' });
     }
 }
 

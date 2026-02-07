@@ -159,6 +159,7 @@ body::before {
     display: grid;
     place-items: center;
     overflow: hidden;
+    contain: paint;
 }
 
 .card-back::before {
@@ -167,15 +168,12 @@ body::before {
     height: 80%;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.6);
-    background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.2) 0 6px, rgba(255, 255, 255, 0.05) 6px 12px);
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04));
 }
 
 .card-back:nth-child(2) { transform: translate(6px, -4px) rotate(2deg); }
 .card-back:nth-child(3) { transform: translate(12px, -8px) rotate(-1deg); }
 .card-back:nth-child(4) { transform: translate(18px, -12px) rotate(1deg); }
-.card-back:nth-child(5) { transform: translate(24px, -16px) rotate(-2deg); }
-.card-back:nth-child(6) { transform: translate(30px, -20px) rotate(2deg); }
-.card-back:nth-child(7) { transform: translate(36px, -24px) rotate(-1deg); }
 
 .table-screen {
     flex-direction: column;

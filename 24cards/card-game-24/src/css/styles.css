@@ -246,7 +246,7 @@ body.safe-mode .card-back {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    z-index: 1;
+    z-index: 3;
 }
 
 .player-name-tag {
@@ -342,10 +342,7 @@ body.safe-mode .card-back {
     height: 182px;
     transform-style: preserve-3d;
     transition: transform 0.6s ease, left 0.6s ease, top 0.6s ease;
-}
-
-.deal-card.flipped .card-inner {
-    transform: rotateY(180deg);
+    z-index: 3;
 }
 
 .card-inner {
@@ -353,7 +350,12 @@ body.safe-mode .card-back {
     width: 100%;
     height: 100%;
     transform-style: preserve-3d;
+    transform: rotateY(180deg);
     transition: transform 0.6s ease;
+}
+
+.deal-card.flipped .card-inner {
+    transform: rotateY(0deg);
 }
 
 .card-face {

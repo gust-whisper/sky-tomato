@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('safe') === '1') {
+        document.body.classList.add('safe-mode');
+    }
+
     const screens = {
         title: document.getElementById('title-screen'),
         solo: document.getElementById('solo-screen'),

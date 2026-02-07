@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const soloButton = document.getElementById('solo-mode');
     const multiplayerButton = document.getElementById('multiplayer-mode');
     const backButtons = document.querySelectorAll('[data-action="back"]');
+    const editButtons = document.querySelectorAll('[data-edit]');
 
     const showScreen = (screenKey) => {
         Object.values(screens).forEach((screen) => screen.classList.remove('screen-active'));
@@ -17,4 +18,19 @@ document.addEventListener('DOMContentLoaded', () => {
     soloButton.addEventListener('click', () => showScreen('solo'));
     multiplayerButton.addEventListener('click', () => showScreen('multiplayer'));
     backButtons.forEach((button) => button.addEventListener('click', () => showScreen('title')));
+
+    editButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const playerId = button.getAttribute('data-edit');
+            const nameTag = document.querySelector(`.player-name[data-player="${playerId}"]`);
+            if (!nameTag) {
+                return;
+            }
+            const currentName = nameTag.textContent.trim();
+            const nextName = window.prompt('Edit player name:', currentName);
+            if (nextName && nextName.trim().length > 0) {
+                nameTag.textContent = nextName.trim();
+            }
+        });
+    });
 });

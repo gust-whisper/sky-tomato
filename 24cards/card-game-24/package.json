@@ -1,0 +1,23 @@
+{
+  "name": "card-game-24",
+  "version": "1.0.0",
+  "description": "A card game called '24' with options for Solo or Multiplayer modes.",
+  "main": "src/index.html",
+  "scripts": {
+    "start": "live-server src",
+    "build": "echo 'Build step not defined'",
+    "test": "echo 'No tests defined'"
+  },
+  "keywords": [
+    "card game",
+    "24",
+    "poker",
+    "multiplayer",
+    "solo"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "live-server": "^1.2.1"
+  }
+}

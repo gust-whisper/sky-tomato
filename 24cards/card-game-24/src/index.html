@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24 Card Game</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/poker-table.css">
+</head>
+<body>
+    <main class="game-shell">
+        <section id="title-screen" class="screen screen-active title-screen">
+            <div class="title-piles">
+                <div class="card-pile pile-a">
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                </div>
+                <div class="card-pile pile-b">
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                </div>
+                <div class="card-pile pile-c">
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                </div>
+            </div>
+            <div class="title-hero">
+                <div class="title-badge">
+                    <span class="title-number">24</span>
+                    <span class="title-sub">Card Game</span>
+                </div>
+                <div class="mode-selection">
+                    <button id="solo-mode" class="primary-button">Solo</button>
+                    <button id="multiplayer-mode" class="ghost-button">Multiplayer</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="solo-screen" class="screen table-screen">
+            <header class="table-header">
+                <div>
+                    <h2>Solo Mode</h2>
+                    <p>Coming soon — set the vibe and warm up.</p>
+                </div>
+                <button class="ghost-button" data-action="back">Back</button>
+            </header>
+            <div class="table-area">
+                <div class="deck-position left">
+                    <div class="deck-stack">
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                    </div>
+                </div>
+                <div class="table-center">
+                    <div class="empty-table">Poker felt ready for play.</div>
+                </div>
+                <div class="deck-position right">
+                    <div class="deck-stack">
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="multiplayer-screen" class="screen table-screen">
+            <header class="table-header">
+                <div>
+                    <h2>Multiplayer Mode</h2>
+                    <p>Two decks, face down, ready to deal.</p>
+                </div>
+                <button class="ghost-button" data-action="back">Back</button>
+            </header>
+            <div class="table-area">
+                <div class="deck-position left">
+                    <div class="deck-label">Player One</div>
+                    <div class="deck-stack">
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                    </div>
+                </div>
+                <div class="table-center">
+                    <div class="empty-table">Empty table — cards face down.</div>
+                </div>
+                <div class="deck-position right">
+                    <div class="deck-label">Player Two</div>
+                    <div class="deck-stack">
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                        <div class="card-back"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="js/ui.js"></script>
+</body>
+</html>

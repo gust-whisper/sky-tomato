@@ -238,9 +238,9 @@ body.safe-mode .card-back {
     align-items: center;
     gap: 24px;
     padding: 40px 28px 28px;
-    border-radius: 28px;
-    background: rgba(4, 20, 12, 0.55);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 14px 32px rgba(0, 0, 0, 0.4);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
     position: relative;
     width: 100%;
     max-width: 1200px;
@@ -327,7 +327,7 @@ body.safe-mode .card-back {
     place-items: center;
     padding: 32px;
     border-radius: 28px;
-    background: rgba(4, 20, 12, 0.25);
+    background: transparent;
     min-height: 120px;
     text-align: center;
     position: static;
@@ -344,6 +344,15 @@ body.safe-mode .card-back {
 
 .play-button:hover {
     transform: translateX(-50%) translateY(-2px);
+}
+
+.deal-card {
+    position: absolute;
+    width: 130px;
+    height: 182px;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease, left 0.6s ease, top 0.6s ease;
+    z-index: 3;
 }
 
 .card-inner {

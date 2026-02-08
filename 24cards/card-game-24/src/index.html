@@ -27,6 +27,10 @@
                     <button class="duration-tab" type="button" data-duration-option="long">Long</button>
                     <button class="duration-tab" type="button" data-duration-option="hell">Hell</button>
                 </div>
+                <div class="countdown-control">
+                    <span>Countdown</span>
+                    <button class="countdown-toggle is-active" type="button" data-countdown-toggle aria-pressed="true">3</button>
+                </div>
             </div>
         </section>
 
@@ -97,6 +101,7 @@
                     </div>
                     <div class="end-banner" aria-hidden="true"></div>
                     <div class="confetti" aria-hidden="true"></div>
+                    <button class="primary-button play-again-button" type="button">Play Again</button>
                 </div>
                 <div class="claimed-pile left" data-claimed="left" aria-hidden="true"></div>
                 <div class="claimed-pile right" data-claimed="right" aria-hidden="true"></div>
@@ -109,6 +114,7 @@
                     <button class="edit-button" data-edit="2" aria-label="Edit Player Two">✎</button>
                 </div>
                 <div class="deck-position left" data-deck="left">
+                    <div class="deck-claim-count" data-deck-count="left">0</div>
                     <div class="deck-stack">
                         <div class="card-back"></div>
                         <div class="card-back"></div>
@@ -121,6 +127,7 @@
                     <button id="play-button" class="primary-button play-button" type="button">Play</button>
                 </div>
                 <div class="deck-position right" data-deck="right">
+                    <div class="deck-claim-count" data-deck-count="right">0</div>
                     <div class="deck-stack">
                         <div class="card-back"></div>
                         <div class="card-back"></div>

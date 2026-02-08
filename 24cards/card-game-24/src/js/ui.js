@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const backButtons = document.querySelectorAll('[data-action="back"]');
     const editButtons = document.querySelectorAll('[data-edit]');
     const playButton = document.getElementById('play-button');
+    const countdownToggles = document.querySelectorAll('[data-countdown-toggle]');
     const durationSlider = document.querySelector('.duration-slider');
     const durationTabs = document.querySelectorAll('[data-duration-option]');
     const dealArea = document.querySelector('.deal-area');
@@ -30,9 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const endCountLeft = document.querySelector('#multiplayer-screen [data-end-count="left"]');
     const endCountRight = document.querySelector('#multiplayer-screen [data-end-count="right"]');
     const confettiLayer = document.querySelector('#multiplayer-screen .confetti');
+    const playAgainButton = document.querySelector('#multiplayer-screen .play-again-button');
     const claimedLeft = document.querySelector('#multiplayer-screen [data-claimed="left"]');
     const claimedRight = document.querySelector('#multiplayer-screen [data-claimed="right"]');
     const deckCounterValue = document.querySelector('#multiplayer-screen .deck-counter-value');
+    const deckCountLeft = document.querySelector('#multiplayer-screen [data-deck-count="left"]');
+    const deckCountRight = document.querySelector('#multiplayer-screen [data-deck-count="right"]');
     const leftDeckPosition = document.querySelector('#multiplayer-screen .deck-position.left');
     const rightDeckPosition = document.querySelector('#multiplayer-screen .deck-position.right');
     const leftDeck = document.querySelector('#multiplayer-screen [data-deck="left"] .deck-stack');
@@ -49,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedClaimSide = null;
     let areNamesLocked = false;
     let isGameOver = false;
+    let countdownsEnabled = true;
     let leftDeckCards = [];
     let rightDeckCards = [];
     let currentRoundCards = [];
@@ -85,6 +90,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         deckCounterValue.textContent = `P1: ${leftDeckCards.length} | P2: ${rightDeckCards.length}`;
+    };
+
+    const updateCountdownToggles = () => {
+        countdownToggles.forEach((toggle) => {
+            toggle.classList.toggle('is-active', countdownsEnabled);
+            toggle.setAttribute('aria-pressed', countdownsEnabled ? 'true' : 'false');
+            toggle.textContent = countdownsEnabled ? '3' : '0';
+        });
     };
 
 
@@ -170,11 +183,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confettiLayer) {
             confettiLayer.innerHTML = '';
         }
+        if (playAgainButton) {
+            playAgainButton.classList.remove('is-visible');
+        }
         if (endCountLeft) {
             endCountLeft.textContent = '0';
         }
         if (endCountRight) {
             endCountRight.textContent = '0';
+        }
+        if (deckCountLeft) {
+            deckCountLeft.textContent = '0';
+        }
+        if (deckCountRight) {
+            deckCountRight.textContent = '0';
         }
         if (leftDeckPosition) {
             leftDeckPosition.classList.remove('is-hidden');
@@ -301,14 +323,117 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         confettiLayer.innerHTML = '';
         const colors = ['#f7a64a', '#e4572e', '#f5f0e6', '#8bd3a8'];
-        const pieces = 24;
+        const pieces = 60;
         for (let i = 0; i < pieces; i += 1) {
             const piece = document.createElement('span');
             piece.className = 'confetti-piece';
             piece.style.left = `${Math.random() * 100}%`;
-            piece.style.animationDelay = `${Math.random() * 0.4}s`;
+            piece.style.animationDelay = `${Math.random() * 0.6}s`;
             piece.style.background = colors[i % colors.length];
             confettiLayer.appendChild(piece);
+        }
+    };
+
+    const prepareManualStart = () => {
+        isRoundActive = false;
+        isCountdownActive = false;
+        if (tableArea) {
+            tableArea.classList.remove('countdown-active');
+        }
+        if (tableCenter) {
+            tableCenter.classList.remove('is-hidden');
+        }
+        if (emptyTableDefault && emptyTable) {
+            emptyTable.textContent = emptyTableDefault;
+        }
+        if (playButton) {
+            playButton.disabled = false;
+        }
+    };
+
+    const redistributeAndRestart = () => {
+        if (!tableArea) {
+            resetMultiplayerState();
+            initMultiplayerDecks();
+            startCountdown({ force: true });
+            return;
+        }
+
+        const cards = Array.from(document.querySelectorAll('#multiplayer-screen .deal-card'));
+        if (cards.length === 0) {
+            resetMultiplayerState();
+            initMultiplayerDecks();
+            startCountdown({ force: true });
+            return;
+        }
+
+        const areaRect = tableArea.getBoundingClientRect();
+        const cardWidth = 157;
+        const cardHeight = 220;
+        const leftOrigin = getDeckOrigin(leftDeck, areaRect, cardWidth, cardHeight);
+        const rightOrigin = getDeckOrigin(rightDeck, areaRect, cardWidth, cardHeight);
+
+        if (tableArea) {
+            tableArea.classList.remove('end-active');
+        }
+        if (endOverlay) {
+            endOverlay.setAttribute('aria-hidden', 'true');
+        }
+        if (endBanner) {
+            endBanner.classList.remove('is-visible');
+            endBanner.textContent = '';
+        }
+        if (confettiLayer) {
+            confettiLayer.innerHTML = '';
+        }
+        if (playAgainButton) {
+            playAgainButton.classList.remove('is-visible');
+        }
+
+        cards.forEach((card, index) => {
+            const target = index % 2 === 0 ? leftOrigin : rightOrigin;
+            const offset = Math.floor(index / 2) * 4;
+            const cardRect = card.getBoundingClientRect();
+            const startX = cardRect.left - areaRect.left;
+            const startY = cardRect.top - areaRect.top;
+            tableArea.appendChild(card);
+            card.classList.remove('is-boosted');
+            card.classList.remove('flipped');
+            card.style.left = `${startX}px`;
+            card.style.top = `${startY}px`;
+            requestAnimationFrame(() => {
+                card.style.left = `${target.x + offset}px`;
+                card.style.top = `${target.y - offset * 0.6}px`;
+            });
+        });
+
+        window.setTimeout(() => {
+            resetMultiplayerState();
+            initMultiplayerDecks();
+            startCountdown({ force: true });
+        }, 1000);
+    };
+
+    const startRoundImmediate = () => {
+        if (isGameOver) {
+            return;
+        }
+        hidePauseOverlay();
+        lastClaimSide = null;
+        selectedClaimSide = null;
+        isRoundActive = false;
+        isCountdownActive = false;
+        if (tableArea) {
+            tableArea.classList.remove('countdown-active');
+        }
+        if (tableCenter) {
+            tableCenter.classList.add('is-hidden');
+        }
+        clearDealtCards();
+        dealCards({ flipOnDeal: true });
+        isRoundActive = true;
+        if (playButton) {
+            playButton.disabled = false;
         }
     };
 
@@ -331,6 +456,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (endBanner) {
             endBanner.classList.remove('is-visible');
         }
+        if (playAgainButton) {
+            playAgainButton.classList.remove('is-visible');
+        }
         if (playButton) {
             playButton.disabled = true;
         }
@@ -341,12 +469,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalRight = rightCards.length;
         let countLeft = 0;
         let countRight = 0;
+        const cardWidth = 157;
 
         if (endCountLeft) {
             endCountLeft.textContent = '0';
         }
         if (endCountRight) {
             endCountRight.textContent = '0';
+        }
+        if (deckCountLeft) {
+            deckCountLeft.textContent = '0';
+        }
+        if (deckCountRight) {
+            deckCountRight.textContent = '0';
         }
 
         const areaRect = tableArea.getBoundingClientRect();
@@ -364,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cardRect = card.getBoundingClientRect();
                 const startX = cardRect.left - areaRect.left;
                 const startY = cardRect.top - areaRect.top;
-                const targetX = laneRect.left - areaRect.left + 20 + (index % 3) * 6;
+                const targetX = laneRect.left - areaRect.left + (laneRect.width - cardWidth) / 2 + (index % 3) * 6;
                 const targetY = laneRect.top - areaRect.top + 40 + Math.floor(index / 3) * 6;
                 tableArea.appendChild(card);
                 card.classList.remove('is-boosted');
@@ -380,10 +515,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (endCountLeft) {
                             endCountLeft.textContent = String(countLeft);
                         }
+                        if (deckCountLeft) {
+                            deckCountLeft.textContent = String(countLeft);
+                        }
                     } else {
                         countRight += 1;
                         if (endCountRight) {
                             endCountRight.textContent = String(countRight);
+                        }
+                        if (deckCountRight) {
+                            deckCountRight.textContent = String(countRight);
                         }
                     }
                     processed += 1;
@@ -408,6 +549,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         ? `${winnerName} has won with a total of ${winnerScore} cards`
                         : `Tie game at ${totalLeft} cards`;
                     endBanner.classList.add('is-visible');
+                }
+                if (playAgainButton) {
+                    playAgainButton.classList.add('is-visible');
                 }
                 spawnConfetti();
             });
@@ -623,11 +767,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 900);
     };
 
-    const startCountdown = () => {
+    const startCountdown = ({ force = false } = {}) => {
         if (isCountdownActive) {
             return;
         }
         if (isGameOver) {
+            return;
+        }
+        if (!force && !countdownsEnabled) {
+            startRoundImmediate();
             return;
         }
         if (!tableCenter || !emptyTable) {
@@ -690,7 +838,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (multiplayerButton) {
-        multiplayerButton.addEventListener('click', () => showScreen('multiplayer'));
+        multiplayerButton.addEventListener('click', () => {
+            if (leftDeckCards.length === 0 && rightDeckCards.length === 0) {
+                initMultiplayerDecks();
+            }
+            showScreen('multiplayer');
+        });
     }
 
     backButtons.forEach((button) => button.addEventListener('click', () => {
@@ -717,42 +870,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    if (playButton) {
-        playButton.addEventListener('click', () => {
+        if (playButton) {
+            playButton.addEventListener('click', () => {
                 if (leftDeckCards.length === 0 && rightDeckCards.length === 0) {
                     initMultiplayerDecks();
                     claimedCounts.left = 0;
                     claimedCounts.right = 0;
-                    if (tableArea) {
-                        tableArea.classList.remove('end-active');
-                    }
-                    if (endOverlay) {
-                        endOverlay.setAttribute('aria-hidden', 'true');
-                    }
-                    if (endBanner) {
-                        endBanner.classList.remove('is-visible');
-                        endBanner.textContent = '';
-                    }
-                    if (confettiLayer) {
-                        confettiLayer.innerHTML = '';
-                    }
-                    if (endCountLeft) {
-                        endCountLeft.textContent = '0';
-                    }
-                    if (endCountRight) {
-                        endCountRight.textContent = '0';
-                    }
-                    if (leftDeckPosition) {
-                        leftDeckPosition.classList.remove('is-hidden');
-                    }
-                    if (rightDeckPosition) {
-                        rightDeckPosition.classList.remove('is-hidden');
-                    }
                     isGameOver = false;
                 }
-                startCountdown();
+                startCountdown({ force: true });
             });
-    }
+        }
+
+        if (playAgainButton) {
+            playAgainButton.addEventListener('click', () => {
+                redistributeAndRestart();
+            });
+        }
 
     pauseButtons.forEach((button) => {
         button.addEventListener('click', () => {
@@ -841,6 +975,15 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
+
+    countdownToggles.forEach((toggle) => {
+        toggle.addEventListener('click', () => {
+            countdownsEnabled = !countdownsEnabled;
+            updateCountdownToggles();
+        });
+    });
+
+    updateCountdownToggles();
 
     showScreen('title');
 });

@@ -154,6 +154,32 @@ body.safe-mode::before {
     transform: translateX(300%);
 }
 
+.countdown-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.countdown-toggle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(8, 32, 18, 0.75);
+    color: #f5f0e6;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.countdown-toggle.is-active {
+    background: linear-gradient(135deg, #f7a64a, #e4572e);
+    color: #1c1208;
+}
+
 body.safe-mode .title-piles {
     display: none;
 }
@@ -400,7 +426,7 @@ body.safe-mode .card-back {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease;
-    z-index: 2;
+    z-index: 6;
 }
 
 .table-area.end-active .end-overlay {
@@ -424,19 +450,20 @@ body.safe-mode .card-back {
 }
 
 .end-lane.left {
-    left: 25%;
+    left: calc(50% - 140px);
     transform: translateX(-50%);
 }
 
 .end-lane.right {
-    right: 25%;
-    transform: translateX(50%);
+    left: calc(50% + 140px);
+    transform: translateX(-50%);
 }
 
 .end-count-label {
     font-size: 2.4rem;
     font-weight: 700;
     letter-spacing: 0.08em;
+    transform: translateY(-120px);
 }
 
 .end-banner {
@@ -448,7 +475,7 @@ body.safe-mode .card-back {
     border-radius: 999px;
     background: rgba(8, 28, 16, 0.9);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    font-size: 1.1rem;
+    font-size: 1.8rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     opacity: 0;
@@ -457,6 +484,25 @@ body.safe-mode .card-back {
 
 .end-banner.is-visible {
     opacity: 1;
+}
+
+.play-again-button {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 7;
+}
+
+.play-again-button.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.play-again-button.primary-button:hover {
+    transform: translateX(-50%) translateY(-2px);
 }
 
 .confetti {
@@ -468,22 +514,22 @@ body.safe-mode .card-back {
 
 .confetti-piece {
     position: absolute;
-    width: 8px;
-    height: 14px;
+    width: 10px;
+    height: 18px;
     opacity: 0.8;
-    animation: confetti-fall 1.6s ease-out forwards;
+    animation: confetti-fall 2.2s ease-out forwards;
 }
 
 @keyframes confetti-fall {
     0% {
-        transform: translateY(-20px) rotate(0deg);
+        transform: translateY(-30px) rotate(0deg);
         opacity: 0;
     }
     10% {
         opacity: 1;
     }
     100% {
-        transform: translateY(180px) rotate(220deg);
+        transform: translateY(320px) rotate(360deg);
         opacity: 0;
     }
 }
@@ -500,6 +546,26 @@ body.safe-mode .card-back {
 .deck-position.is-hidden {
     opacity: 0;
     visibility: hidden;
+}
+
+.deck-claim-count {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(8, 28, 16, 0.85);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.table-area.end-active .deck-claim-count {
+    opacity: 1;
 }
 
 .claimed-pile.left {
@@ -568,6 +634,7 @@ body.safe-mode .card-back {
     flex-direction: column;
     align-items: center;
     gap: 12px;
+    position: relative;
 }
 
 .deck-label {
@@ -625,6 +692,7 @@ body.safe-mode .card-back {
     transform-style: preserve-3d;
     transition: transform 0.6s ease, left 0.6s ease, top 0.6s ease;
     z-index: 3;
+    pointer-events: none;
 }
 
 .deal-card.is-boosted {

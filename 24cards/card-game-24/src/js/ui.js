@@ -21,16 +21,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const emptyTable = document.querySelector('#multiplayer-screen .empty-table');
     const pauseOverlay = document.querySelector('#multiplayer-screen .pause-overlay');
     const pauseButtons = document.querySelectorAll('#multiplayer-screen [data-pause]');
+    const claimSlider = document.querySelector('#multiplayer-screen .pause-claim-slider');
+    const claimTabs = document.querySelectorAll('#multiplayer-screen [data-claim-side]');
     const claimedLeft = document.querySelector('#multiplayer-screen [data-claimed="left"]');
     const claimedRight = document.querySelector('#multiplayer-screen [data-claimed="right"]');
     const leftDeck = document.querySelector('#multiplayer-screen [data-deck="left"] .deck-stack');
     const rightDeck = document.querySelector('#multiplayer-screen [data-deck="right"] .deck-stack');
+    const playerOneName = document.querySelector('#multiplayer-screen .player-name[data-player="1"]');
+    const playerTwoName = document.querySelector('#multiplayer-screen .player-name[data-player="2"]');
     const emptyTableDefault = emptyTable ? emptyTable.textContent.trim() : '';
     let countdownTimer = null;
     let isCountdownActive = false;
     let isPauseActive = false;
     let isRoundActive = false;
     let lastClaimSide = null;
+    const falseAlarmCounts = { left: 0, right: 0 };
+    let selectedClaimSide = null;
+    let areNamesLocked = false;
 
     const leftKeys = new Set('QWERTASDFGZXCV'.split(''));
     const rightKeys = new Set('YHBNJUIKMLOP'.split(''));
@@ -59,6 +66,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const isMultiplayerActive = () => screens.multiplayer && screens.multiplayer.classList.contains('screen-active');
 
+    const getPlayerNames = () => ({
+        left: playerOneName ? playerOneName.textContent.trim() : 'Player One',
+        right: playerTwoName ? playerTwoName.textContent.trim() : 'Player Two',
+    });
+
+    const updateClaimLabels = () => {
+        const names = getPlayerNames();
+        claimTabs.forEach((tab) => {
+            const side = tab.getAttribute('data-claim-side');
+            tab.textContent = side === 'right' ? names.right : names.left;
+        });
+    };
+
+    const setClaimSide = (side) => {
+        if (!side || !claimSlider) {
+            return;
+        }
+        selectedClaimSide = side;
+        claimSlider.setAttribute('data-active', side);
+        claimTabs.forEach((tab) => {
+            const tabSide = tab.getAttribute('data-claim-side');
+            tab.classList.toggle('is-active', tabSide === side);
+        });
+    };
+
+    const lockPlayerNames = () => {
+        if (areNamesLocked) {
+            return;
+        }
+        areNamesLocked = true;
+        editButtons.forEach((button) => button.classList.add('is-locked'));
+    };
+
+    const unlockPlayerNames = () => {
+        areNamesLocked = false;
+        editButtons.forEach((button) => button.classList.remove('is-locked'));
+    };
+
     const resetMultiplayerState = () => {
         if (countdownTimer) {
             window.clearInterval(countdownTimer);
@@ -68,6 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isPauseActive = false;
         isRoundActive = false;
         lastClaimSide = null;
+        selectedClaimSide = null;
+        falseAlarmCounts.left = 0;
+        falseAlarmCounts.right = 0;
+        unlockPlayerNames();
         if (tableArea) {
             tableArea.classList.remove('countdown-active', 'pause-active');
         }
@@ -188,6 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         isPauseActive = true;
         lastClaimSide = side;
+        updateClaimLabels();
+        setClaimSide(side);
         tableArea.classList.add('pause-active');
         if (pauseOverlay) {
             pauseOverlay.setAttribute('aria-hidden', 'false');
@@ -344,8 +395,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         hidePauseOverlay();
         lastClaimSide = null;
+        selectedClaimSide = null;
         isRoundActive = false;
         isCountdownActive = true;
+        lockPlayerNames();
         if (playButton) {
             playButton.disabled = true;
         }
@@ -405,6 +458,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editButtons.forEach((button) => {
         button.addEventListener('click', () => {
+            if (areNamesLocked) {
+                return;
+            }
             const playerId = button.getAttribute('data-edit');
             const nameTag = document.querySelector(`.player-name[data-player="${playerId}"]`);
             if (!nameTag) {
@@ -414,6 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const nextName = window.prompt('Edit player name:', currentName);
             if (nextName && nextName.trim().length > 0) {
                 nameTag.textContent = nextName.trim();
+                updateClaimLabels();
             }
         });
     });
@@ -427,13 +484,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const action = button.getAttribute('data-pause');
             if (action === 'false-alarm') {
                 hidePauseOverlay();
+                const countSide = selectedClaimSide || lastClaimSide;
+                if (countSide && falseAlarmCounts[countSide] !== undefined) {
+                    falseAlarmCounts[countSide] += 1;
+                    if (falseAlarmCounts[countSide] >= 3) {
+                        falseAlarmCounts[countSide] = 0;
+                        isRoundActive = false;
+                        const awardSide = countSide === 'left' ? 'right' : 'left';
+                        moveCardsToCorner(awardSide);
+                        return;
+                    }
+                }
                 return;
             }
             if (action === 'claim') {
                 hidePauseOverlay();
                 isRoundActive = false;
-                if (lastClaimSide) {
-                    moveCardsToCorner(lastClaimSide);
+                falseAlarmCounts.left = 0;
+                falseAlarmCounts.right = 0;
+                const awardSide = selectedClaimSide || lastClaimSide;
+                if (awardSide) {
+                    moveCardsToCorner(awardSide);
                 }
                 return;
             }
@@ -442,6 +513,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 isRoundActive = false;
                 returnCardsToDecks();
             }
+        });
+    });
+
+    claimTabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+            const side = tab.getAttribute('data-claim-side');
+            setClaimSide(side);
         });
     });
 

@@ -17,8 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const playButton = document.getElementById('play-button');
     const dealArea = document.querySelector('.deal-area');
     const tableArea = document.querySelector('#multiplayer-screen .table-area');
+    const tableCenter = document.querySelector('#multiplayer-screen .table-center');
+    const emptyTable = document.querySelector('#multiplayer-screen .empty-table');
     const leftDeck = document.querySelector('#multiplayer-screen [data-deck="left"] .deck-stack');
     const rightDeck = document.querySelector('#multiplayer-screen [data-deck="right"] .deck-stack');
+    const emptyTableDefault = emptyTable ? emptyTable.textContent.trim() : '';
+    let countdownTimer = null;
+    let isCountdownActive = false;
 
     const suits = [
         { symbol: '♠', name: 'spades', color: 'black' },
@@ -94,10 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const getCenterTargets = (areaRect, cardWidth, cardHeight) => {
-        const leftX = areaRect.width * 0.35 - cardWidth / 2;
-        const rightX = areaRect.width * 0.65 - cardWidth / 2;
-        const topY = areaRect.height * 0.35 - cardHeight / 2;
-        const bottomY = areaRect.height * 0.62 - cardHeight / 2;
+        const leftX = areaRect.width * 0.44 - cardWidth / 2 - 15;
+        const rightX = areaRect.width * 0.56 - cardWidth / 2 + 15;
+        const topY = areaRect.height * 0.36 - cardHeight / 2 - 15;
+        const bottomY = areaRect.height * 0.64 - cardHeight / 2 + 15;
 
         return [
             { x: leftX, y: topY },
@@ -125,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dealArea.innerHTML = '';
     };
 
-    const dealCards = () => {
+    const dealCards = ({ flipOnDeal = true } = {}) => {
         if (!dealArea || !tableArea) {
             return;
         }
@@ -133,8 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const deck = shuffleDeck(createDeck());
         const drawn = deck.slice(0, 4);
         const areaRect = tableArea.getBoundingClientRect();
-        const cardWidth = 130;
-        const cardHeight = 182;
+        const cardWidth = 157;
+        const cardHeight = 220;
         const targets = getCenterTargets(areaRect, cardWidth, cardHeight);
         const leftOrigin = getDeckOrigin(leftDeck, areaRect, cardWidth, cardHeight);
         const rightOrigin = getDeckOrigin(rightDeck, areaRect, cardWidth, cardHeight);
@@ -154,7 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             requestAnimationFrame(() => {
                 cardElement.style.transform = 'translate(0, 0)';
-                cardElement.classList.add('flipped');
+                if (flipOnDeal) {
+                    cardElement.classList.add('flipped');
+                }
             });
         });
     };
@@ -185,7 +192,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (playButton) {
-        playButton.addEventListener('click', dealCards);
+        playButton.addEventListener('click', () => {
+            if (isCountdownActive) {
+                return;
+            }
+            if (!tableCenter || !emptyTable) {
+                dealCards();
+                return;
+            }
+
+            isCountdownActive = true;
+            playButton.disabled = true;
+            tableCenter.classList.remove('is-hidden');
+            tableArea.classList.add('countdown-active');
+            emptyTable.textContent = '3';
+
+            clearDealtCards();
+            dealCards({ flipOnDeal: false });
+
+            let count = 3;
+            countdownTimer = window.setInterval(() => {
+                count -= 1;
+                if (count > 0) {
+                    emptyTable.textContent = String(count);
+                    return;
+                }
+
+                window.clearInterval(countdownTimer);
+                countdownTimer = null;
+                tableArea.classList.remove('countdown-active');
+                tableCenter.classList.add('is-hidden');
+                if (emptyTableDefault) {
+                    emptyTable.textContent = emptyTableDefault;
+                }
+
+                if (dealArea) {
+                    dealArea.querySelectorAll('.deal-card').forEach((card) => {
+                        card.classList.add('flipped');
+                    });
+                }
+
+                isCountdownActive = false;
+                playButton.disabled = false;
+            }, 1000);
+        });
     }
 
     showScreen('title');

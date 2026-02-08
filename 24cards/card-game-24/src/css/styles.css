@@ -206,7 +206,6 @@ body.safe-mode .card-back {
 .table-screen {
     flex-direction: column;
     gap: 24px;
-    min-height: calc(100vh - 64px);
 }
 
 .table-header {
@@ -241,10 +240,6 @@ body.safe-mode .card-back {
     background: linear-gradient(135deg, rgba(18, 67, 39, 0.9), rgba(13, 44, 27, 0.9));
     box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.06), 0 16px 36px rgba(0, 0, 0, 0.45);
     position: relative;
-    width: 100%;
-    max-width: 1200px;
-    margin: auto auto 0;
-    min-height: 260px;
 }
 
 .deal-area {
@@ -341,12 +336,8 @@ body.safe-mode .card-back {
     position: absolute;
     bottom: 18px;
     left: 50%;
-    transform: translate(-50%, 0);
+    transform: translateX(-50%);
     margin: 0;
-}
-
-.play-button:hover {
-    transform: translate(-50%, -2px);
 }
 
 .deal-card {

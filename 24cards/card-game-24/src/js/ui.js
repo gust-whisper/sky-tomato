@@ -717,6 +717,96 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1350);
     };
 
+    const moveCardsToSplitPiles = () => {
+        if (!dealArea || !tableArea) {
+            runFinalCount();
+            return;
+        }
+        const cards = Array.from(dealArea.querySelectorAll('.deal-card'));
+        if (cards.length === 0) {
+            runFinalCount();
+            return;
+        }
+
+        const areaRect = tableArea.getBoundingClientRect();
+        const cardWidth = 157;
+        const cardHeight = 220;
+        const stackX = areaRect.width / 2 - cardWidth / 2;
+        const stackY = areaRect.height / 2 - cardHeight / 2;
+        const cornerPadding = 18;
+        const leftOrigin = getDeckOrigin(leftDeck, areaRect, cardWidth, cardHeight);
+        const rightOrigin = getDeckOrigin(rightDeck, areaRect, cardWidth, cardHeight);
+        const cornerY = areaRect.height - cardHeight - cornerPadding;
+
+        const leftCards = [];
+        const rightCards = [];
+
+        cards.forEach((card) => {
+            const originSide = card.dataset.origin || 'left';
+            if (originSide === 'right') {
+                rightCards.push(card);
+            } else {
+                leftCards.push(card);
+            }
+            card.classList.remove('is-boosted');
+            card.style.left = `${stackX}px`;
+            card.style.top = `${stackY}px`;
+        });
+
+        window.setTimeout(() => {
+            if (claimedLeft) {
+                claimedLeft.style.left = `${leftOrigin.x}px`;
+                claimedLeft.style.right = 'auto';
+                claimedLeft.style.bottom = `${cornerPadding}px`;
+            }
+            if (claimedRight) {
+                claimedRight.style.left = `${rightOrigin.x}px`;
+                claimedRight.style.right = 'auto';
+                claimedRight.style.bottom = `${cornerPadding}px`;
+            }
+            cards.forEach((card) => {
+                const originSide = card.dataset.origin || 'left';
+                const cornerX = originSide === 'right' ? rightOrigin.x : leftOrigin.x;
+                card.style.left = `${cornerX}px`;
+                card.style.top = `${cornerY}px`;
+            });
+        }, 650);
+
+        window.setTimeout(() => {
+            const appendToPile = (pile, pileCards) => {
+                if (!pile) {
+                    pileCards.forEach((card) => card.remove());
+                    return;
+                }
+                const existing = pile.querySelectorAll('.deal-card').length;
+                pileCards.forEach((card, index) => {
+                    const cardRect = card.getBoundingClientRect();
+                    const pileRect = pile.getBoundingClientRect();
+                    const offsetX = cardRect.left - pileRect.left;
+                    const offsetY = cardRect.top - pileRect.top;
+                    pile.appendChild(card);
+                    card.style.left = `${offsetX}px`;
+                    card.style.top = `${offsetY}px`;
+                    const stackOffset = (existing + index) * 4;
+                    requestAnimationFrame(() => {
+                        card.style.left = `${stackOffset}px`;
+                        card.style.top = `${stackOffset * -0.6}px`;
+                    });
+                });
+            };
+
+            appendToPile(claimedLeft, leftCards);
+            appendToPile(claimedRight, rightCards);
+        }, 700);
+
+        window.setTimeout(() => {
+            claimedCounts.left += leftCards.length;
+            claimedCounts.right += rightCards.length;
+            currentRoundCards = [];
+            runFinalCount();
+        }, 1350);
+    };
+
     const returnCardsToDecks = () => {
         if (!dealArea || !tableArea) {
             startCountdown();
@@ -749,11 +839,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 150);
 
         window.setTimeout(() => {
+            const insertRandomly = (deck, card) => {
+                const index = Math.floor(Math.random() * (deck.length + 1));
+                deck.splice(index, 0, card);
+            };
+
             currentRoundCards.forEach((card) => {
                 if (card.origin === 'right') {
-                    rightDeckCards.unshift(card);
+                    insertRandomly(rightDeckCards, card);
                 } else {
-                    leftDeckCards.unshift(card);
+                    insertRandomly(leftDeckCards, card);
                 }
             });
             currentRoundCards = [];
@@ -920,7 +1015,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (action === 'impossible') {
                 hidePauseOverlay();
                 isRoundActive = false;
-                returnCardsToDecks();
+                if (leftDeckCards.length === 0 && rightDeckCards.length === 0) {
+                    moveCardsToSplitPiles();
+                } else {
+                    returnCardsToDecks();
+                }
             }
         });
     });
@@ -951,6 +1050,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         if (isCountdownActive || !isRoundActive) {
+            return;
+        }
+        if (event.code === 'Space') {
+            event.preventDefault();
+            isRoundActive = false;
+            if (leftDeckCards.length === 0 && rightDeckCards.length === 0) {
+                moveCardsToSplitPiles();
+            } else {
+                returnCardsToDecks();
+            }
             return;
         }
         const key = event.key.toUpperCase();

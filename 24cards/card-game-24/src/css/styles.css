@@ -333,11 +333,7 @@ body.safe-mode .card-back {
 }
 
 .play-button {
-    position: absolute;
-    bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    margin: 0;
+    margin-top: 20px;
 }
 
 .deal-card {

@@ -64,6 +64,15 @@
             </header>
             <div class="table-area">
                 <div class="deal-area" aria-hidden="true"></div>
+                <div class="pause-overlay" aria-hidden="true">
+                    <div class="pause-actions">
+                        <button class="ghost-button pause-button" type="button" data-pause="false-alarm">False Alarm</button>
+                        <button class="primary-button pause-button" type="button" data-pause="claim">24!</button>
+                        <button class="ghost-button pause-button" type="button" data-pause="impossible">Impossible</button>
+                    </div>
+                </div>
+                <div class="claimed-pile left" data-claimed="left" aria-hidden="true"></div>
+                <div class="claimed-pile right" data-claimed="right" aria-hidden="true"></div>
                 <div class="player-name-tag left">
                     <span class="player-name" data-player="1">Player One</span>
                     <button class="edit-button" data-edit="1" aria-label="Edit Player One">✎</button>

@@ -19,11 +19,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableArea = document.querySelector('#multiplayer-screen .table-area');
     const tableCenter = document.querySelector('#multiplayer-screen .table-center');
     const emptyTable = document.querySelector('#multiplayer-screen .empty-table');
+    const pauseOverlay = document.querySelector('#multiplayer-screen .pause-overlay');
+    const pauseButtons = document.querySelectorAll('#multiplayer-screen [data-pause]');
+    const claimedLeft = document.querySelector('#multiplayer-screen [data-claimed="left"]');
+    const claimedRight = document.querySelector('#multiplayer-screen [data-claimed="right"]');
     const leftDeck = document.querySelector('#multiplayer-screen [data-deck="left"] .deck-stack');
     const rightDeck = document.querySelector('#multiplayer-screen [data-deck="right"] .deck-stack');
     const emptyTableDefault = emptyTable ? emptyTable.textContent.trim() : '';
     let countdownTimer = null;
     let isCountdownActive = false;
+    let isPauseActive = false;
+    let isRoundActive = false;
+    let lastClaimSide = null;
+
+    const leftKeys = new Set('QWERTASDFGZXCV'.split(''));
+    const rightKeys = new Set('YHBNJUIKMLOP'.split(''));
 
     const suits = [
         { symbol: '♠', name: 'spades', color: 'black' },
@@ -44,6 +54,38 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.add('title-active');
         } else {
             document.body.classList.remove('title-active');
+        }
+    };
+
+    const isMultiplayerActive = () => screens.multiplayer && screens.multiplayer.classList.contains('screen-active');
+
+    const resetMultiplayerState = () => {
+        if (countdownTimer) {
+            window.clearInterval(countdownTimer);
+            countdownTimer = null;
+        }
+        isCountdownActive = false;
+        isPauseActive = false;
+        isRoundActive = false;
+        lastClaimSide = null;
+        if (tableArea) {
+            tableArea.classList.remove('countdown-active', 'pause-active');
+        }
+        if (tableCenter) {
+            tableCenter.classList.add('is-hidden');
+        }
+        if (emptyTableDefault && emptyTable) {
+            emptyTable.textContent = emptyTableDefault;
+        }
+        if (playButton) {
+            playButton.disabled = false;
+        }
+        clearDealtCards();
+        if (claimedLeft) {
+            claimedLeft.innerHTML = '';
+        }
+        if (claimedRight) {
+            claimedRight.innerHTML = '';
         }
     };
 
@@ -130,6 +172,28 @@ document.addEventListener('DOMContentLoaded', () => {
         dealArea.innerHTML = '';
     };
 
+    const hidePauseOverlay = () => {
+        isPauseActive = false;
+        if (tableArea) {
+            tableArea.classList.remove('pause-active');
+        }
+        if (pauseOverlay) {
+            pauseOverlay.setAttribute('aria-hidden', 'true');
+        }
+    };
+
+    const showPauseOverlay = (side) => {
+        if (!tableArea || isPauseActive || isCountdownActive || !isRoundActive) {
+            return;
+        }
+        isPauseActive = true;
+        lastClaimSide = side;
+        tableArea.classList.add('pause-active');
+        if (pauseOverlay) {
+            pauseOverlay.setAttribute('aria-hidden', 'false');
+        }
+    };
+
     const dealCards = ({ flipOnDeal = true } = {}) => {
         if (!dealArea || !tableArea) {
             return;
@@ -150,10 +214,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const cardElement = buildCardElement(card);
             const target = targets[index];
             const origin = index < 2 ? leftOrigin : rightOrigin;
+            const originSide = index < 2 ? 'left' : 'right';
 
             cardElement.style.left = `${target.x}px`;
             cardElement.style.top = `${target.y}px`;
             cardElement.style.transform = `translate(${origin.x - target.x}px, ${origin.y - target.y}px)`;
+            cardElement.dataset.origin = originSide;
 
             dealArea.appendChild(cardElement);
 
@@ -166,6 +232,164 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const moveCardsToCorner = (side) => {
+        if (!dealArea || !tableArea) {
+            return;
+        }
+        const cards = Array.from(dealArea.querySelectorAll('.deal-card'));
+        if (cards.length === 0) {
+            startCountdown();
+            return;
+        }
+        const targetPile = side === 'right' ? claimedRight : claimedLeft;
+        if (!targetPile) {
+            clearDealtCards();
+            startCountdown();
+            return;
+        }
+
+        const areaRect = tableArea.getBoundingClientRect();
+        const cardWidth = 157;
+        const cardHeight = 220;
+        const stackX = areaRect.width / 2 - cardWidth / 2;
+        const stackY = areaRect.height / 2 - cardHeight / 2;
+        const cornerPadding = 18;
+        const leftOrigin = getDeckOrigin(leftDeck, areaRect, cardWidth, cardHeight);
+        const rightOrigin = getDeckOrigin(rightDeck, areaRect, cardWidth, cardHeight);
+        const deckOrigin = side === 'right' ? rightOrigin : leftOrigin;
+        const cornerX = deckOrigin.x;
+        const cornerY = areaRect.height - cardHeight - cornerPadding;
+
+        cards.forEach((card) => {
+            card.style.left = `${stackX}px`;
+            card.style.top = `${stackY}px`;
+        });
+
+        window.setTimeout(() => {
+            targetPile.style.left = `${cornerX}px`;
+            targetPile.style.right = 'auto';
+            targetPile.style.bottom = `${cornerPadding}px`;
+            cards.forEach((card) => {
+                card.style.left = `${cornerX}px`;
+                card.style.top = `${cornerY}px`;
+            });
+        }, 650);
+
+        window.setTimeout(() => {
+            cards.forEach((card, index) => {
+                const cardRect = card.getBoundingClientRect();
+                const pileRect = targetPile.getBoundingClientRect();
+                const offsetX = cardRect.left - pileRect.left;
+                const offsetY = cardRect.top - pileRect.top;
+                targetPile.appendChild(card);
+                card.style.left = `${offsetX}px`;
+                card.style.top = `${offsetY}px`;
+                const stackOffset = index * 4;
+                requestAnimationFrame(() => {
+                    card.style.left = `${stackOffset}px`;
+                    card.style.top = `${stackOffset * -0.6}px`;
+                });
+            });
+        }, 700);
+
+        window.setTimeout(() => {
+            startCountdown();
+        }, 1350);
+    };
+
+    const returnCardsToDecks = () => {
+        if (!dealArea || !tableArea) {
+            startCountdown();
+            return;
+        }
+        const cards = Array.from(dealArea.querySelectorAll('.deal-card'));
+        if (cards.length === 0) {
+            startCountdown();
+            return;
+        }
+
+        const areaRect = tableArea.getBoundingClientRect();
+        const cardWidth = 157;
+        const cardHeight = 220;
+        const leftOrigin = getDeckOrigin(leftDeck, areaRect, cardWidth, cardHeight);
+        const rightOrigin = getDeckOrigin(rightDeck, areaRect, cardWidth, cardHeight);
+
+        cards.forEach((card) => {
+            card.classList.remove('flipped');
+        });
+
+        window.setTimeout(() => {
+            cards.forEach((card) => {
+                const originSide = card.dataset.origin || 'left';
+                const target = originSide === 'right' ? rightOrigin : leftOrigin;
+                card.style.left = `${target.x}px`;
+                card.style.top = `${target.y}px`;
+            });
+        }, 150);
+
+        window.setTimeout(() => {
+            clearDealtCards();
+            startCountdown();
+        }, 900);
+    };
+
+    const startCountdown = () => {
+        if (isCountdownActive) {
+            return;
+        }
+        if (!tableCenter || !emptyTable) {
+            dealCards();
+            return;
+        }
+
+        hidePauseOverlay();
+        lastClaimSide = null;
+        isRoundActive = false;
+        isCountdownActive = true;
+        if (playButton) {
+            playButton.disabled = true;
+        }
+        tableCenter.classList.remove('is-hidden');
+        if (tableArea) {
+            tableArea.classList.add('countdown-active');
+        }
+        emptyTable.textContent = '3';
+
+        clearDealtCards();
+        dealCards({ flipOnDeal: false });
+
+        let count = 3;
+        countdownTimer = window.setInterval(() => {
+            count -= 1;
+            if (count > 0) {
+                emptyTable.textContent = String(count);
+                return;
+            }
+
+            window.clearInterval(countdownTimer);
+            countdownTimer = null;
+            if (tableArea) {
+                tableArea.classList.remove('countdown-active');
+            }
+            tableCenter.classList.add('is-hidden');
+            if (emptyTableDefault) {
+                emptyTable.textContent = emptyTableDefault;
+            }
+
+            if (dealArea) {
+                dealArea.querySelectorAll('.deal-card').forEach((card) => {
+                    card.classList.add('flipped');
+                });
+            }
+
+            isCountdownActive = false;
+            isRoundActive = true;
+            if (playButton) {
+                playButton.disabled = false;
+            }
+        }, 1000);
+    };
+
     if (soloButton) {
         soloButton.addEventListener('click', () => showScreen('solo'));
     }
@@ -174,7 +398,10 @@ document.addEventListener('DOMContentLoaded', () => {
         multiplayerButton.addEventListener('click', () => showScreen('multiplayer'));
     }
 
-    backButtons.forEach((button) => button.addEventListener('click', () => showScreen('title')));
+    backButtons.forEach((button) => button.addEventListener('click', () => {
+        resetMultiplayerState();
+        showScreen('title');
+    }));
 
     editButtons.forEach((button) => {
         button.addEventListener('click', () => {
@@ -192,51 +419,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (playButton) {
-        playButton.addEventListener('click', () => {
-            if (isCountdownActive) {
-                return;
-            }
-            if (!tableCenter || !emptyTable) {
-                dealCards();
-                return;
-            }
-
-            isCountdownActive = true;
-            playButton.disabled = true;
-            tableCenter.classList.remove('is-hidden');
-            tableArea.classList.add('countdown-active');
-            emptyTable.textContent = '3';
-
-            clearDealtCards();
-            dealCards({ flipOnDeal: false });
-
-            let count = 3;
-            countdownTimer = window.setInterval(() => {
-                count -= 1;
-                if (count > 0) {
-                    emptyTable.textContent = String(count);
-                    return;
-                }
-
-                window.clearInterval(countdownTimer);
-                countdownTimer = null;
-                tableArea.classList.remove('countdown-active');
-                tableCenter.classList.add('is-hidden');
-                if (emptyTableDefault) {
-                    emptyTable.textContent = emptyTableDefault;
-                }
-
-                if (dealArea) {
-                    dealArea.querySelectorAll('.deal-card').forEach((card) => {
-                        card.classList.add('flipped');
-                    });
-                }
-
-                isCountdownActive = false;
-                playButton.disabled = false;
-            }, 1000);
-        });
+        playButton.addEventListener('click', () => startCountdown());
     }
+
+    pauseButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const action = button.getAttribute('data-pause');
+            if (action === 'false-alarm') {
+                hidePauseOverlay();
+                return;
+            }
+            if (action === 'claim') {
+                hidePauseOverlay();
+                isRoundActive = false;
+                if (lastClaimSide) {
+                    moveCardsToCorner(lastClaimSide);
+                }
+                return;
+            }
+            if (action === 'impossible') {
+                hidePauseOverlay();
+                isRoundActive = false;
+                returnCardsToDecks();
+            }
+        });
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.repeat || !isMultiplayerActive()) {
+            return;
+        }
+        if (isPauseActive || isCountdownActive || !isRoundActive) {
+            return;
+        }
+        const key = event.key.toUpperCase();
+        if (leftKeys.has(key)) {
+            showPauseOverlay('left');
+            return;
+        }
+        if (rightKeys.has(key)) {
+            showPauseOverlay('right');
+        }
+    });
 
     showScreen('title');
 });

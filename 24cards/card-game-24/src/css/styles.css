@@ -246,7 +246,48 @@ body.safe-mode .card-back {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    z-index: 3;
+    z-index: 5;
+}
+
+.pause-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 4;
+}
+
+.pause-actions {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    display: flex;
+    gap: 16px;
+    transform: translateX(-50%);
+}
+
+.table-area.pause-active .pause-overlay {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.claimed-pile {
+    position: absolute;
+    bottom: 18px;
+    width: 200px;
+    height: 260px;
+    pointer-events: none;
+    z-index: 6;
+}
+
+.claimed-pile.left {
+    left: 18px;
+}
+
+.claimed-pile.right {
+    right: 18px;
 }
 
 .player-name-tag {

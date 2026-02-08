@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const backButtons = document.querySelectorAll('[data-action="back"]');
     const editButtons = document.querySelectorAll('[data-edit]');
     const playButton = document.getElementById('play-button');
+    const durationSlider = document.querySelector('.duration-slider');
+    const durationTabs = document.querySelectorAll('[data-duration-option]');
     const dealArea = document.querySelector('.deal-area');
     const tableArea = document.querySelector('#multiplayer-screen .table-area');
     const tableCenter = document.querySelector('#multiplayer-screen .table-center');
@@ -121,13 +123,16 @@ document.addEventListener('DOMContentLoaded', () => {
             tableArea.classList.remove('countdown-active', 'pause-active');
         }
         if (tableCenter) {
-            tableCenter.classList.add('is-hidden');
+            tableCenter.classList.remove('is-hidden');
         }
         if (emptyTableDefault && emptyTable) {
             emptyTable.textContent = emptyTableDefault;
         }
         if (playButton) {
             playButton.disabled = false;
+        }
+        if (pauseOverlay) {
+            pauseOverlay.setAttribute('aria-hidden', 'true');
         }
         clearDealtCards();
         if (claimedLeft) {
@@ -214,6 +219,17 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     };
 
+    const getDeckBottom = (deckElement, areaRect, cardWidth, cardHeight) => {
+        if (!deckElement) {
+            return { x: areaRect.width / 2 - cardWidth / 2, y: areaRect.height / 2 - cardHeight / 2 };
+        }
+        const deckRect = deckElement.getBoundingClientRect();
+        return {
+            x: deckRect.left - areaRect.left + deckRect.width / 2 - cardWidth / 2,
+            y: deckRect.bottom - areaRect.top - cardHeight + 6,
+        };
+    };
+
     const clearDealtCards = () => {
         if (!dealArea) {
             return;
@@ -256,8 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const cardWidth = 157;
         const cardHeight = 220;
         const targets = getCenterTargets(areaRect, cardWidth, cardHeight);
-        const leftOrigin = getDeckOrigin(leftDeck, areaRect, cardWidth, cardHeight);
-        const rightOrigin = getDeckOrigin(rightDeck, areaRect, cardWidth, cardHeight);
+        const leftOrigin = getDeckBottom(leftDeck, areaRect, cardWidth, cardHeight);
+        const rightOrigin = getDeckBottom(rightDeck, areaRect, cardWidth, cardHeight);
 
         clearDealtCards();
 
@@ -276,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             requestAnimationFrame(() => {
                 cardElement.style.transform = 'translate(0, 0)';
+                cardElement.classList.add('is-boosted');
                 if (flipOnDeal) {
                     cardElement.classList.add('flipped');
                 }
@@ -312,6 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cornerY = areaRect.height - cardHeight - cornerPadding;
 
         cards.forEach((card) => {
+            card.classList.remove('is-boosted');
             card.style.left = `${stackX}px`;
             card.style.top = `${stackY}px`;
         });
@@ -366,6 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const rightOrigin = getDeckOrigin(rightDeck, areaRect, cardWidth, cardHeight);
 
         cards.forEach((card) => {
+            card.classList.remove('is-boosted');
             card.classList.remove('flipped');
         });
 
@@ -527,7 +546,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.repeat || !isMultiplayerActive()) {
             return;
         }
-        if (isPauseActive || isCountdownActive || !isRoundActive) {
+        if (isPauseActive) {
+            if (event.code === 'Space') {
+                event.preventDefault();
+                hidePauseOverlay();
+                isRoundActive = false;
+                falseAlarmCounts.left = 0;
+                falseAlarmCounts.right = 0;
+                const awardSide = selectedClaimSide || lastClaimSide;
+                if (awardSide) {
+                    moveCardsToCorner(awardSide);
+                }
+            }
+            return;
+        }
+        if (isCountdownActive || !isRoundActive) {
             return;
         }
         const key = event.key.toUpperCase();
@@ -538,6 +571,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (rightKeys.has(key)) {
             showPauseOverlay('right');
         }
+    });
+
+    durationTabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+            if (!durationSlider) {
+                return;
+            }
+            const option = tab.getAttribute('data-duration-option') || 'norm';
+            durationSlider.setAttribute('data-duration', option);
+            durationTabs.forEach((other) => {
+                other.classList.toggle('is-active', other === tab);
+            });
+        });
     });
 
     showScreen('title');
